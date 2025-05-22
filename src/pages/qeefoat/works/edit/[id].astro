@@ -2,22 +2,21 @@
 export const prerender = false;
 
 import Layout from '../../../../layouts/Layout.astro';
-import MarkdownEditor from '../../../../components/MarkdownEditor.astro';
 import '../../../../styles/globals.css';
 
 const { id } = Astro.params;
 ---
 
-<Layout title={`Edit Blog Post - Admin`}>
+<Layout title={`Edit Work - Qeefoat`}>
   <div class="container mx-auto px-4 py-12">
     <div class="max-w-4xl mx-auto">
       <div class="flex items-center justify-between mb-8">
-        <h1 class="text-4xl font-bold">Edit Blog Post</h1>
-        <a href="/admin/blog" class="text-primary hover:underline">← Back to Blog</a>
+        <h1 class="text-4xl font-bold">Edit Work</h1>
+        <a href="/qeefoat/works" class="text-primary hover:underline">← Back to Works</a>
       </div>
       
       <div class="bg-card border rounded-lg p-6">
-        <form id="edit-blog-form" class="space-y-4">
+        <form id="edit-work-form" class="space-y-4">
           <div>
             <label for="title" class="block text-sm font-medium mb-2">Title</label>
             <input type="text" id="title" name="title" required 
@@ -25,41 +24,24 @@ const { id } = Astro.params;
           </div>
           
           <div>
-            <label for="slug" class="block text-sm font-medium mb-2">Slug</label>
-            <input type="text" id="slug" name="slug" required 
-                   class="w-full px-3 py-2 border border-input rounded-md bg-background" />
-          </div>
-
-          <div>
-            <label for="excerpt" class="block text-sm font-medium mb-2">Excerpt</label>
-            <textarea id="excerpt" name="excerpt" required rows="3"
+            <label for="description" class="block text-sm font-medium mb-2">Description</label>
+            <textarea id="description" name="description" required rows="3"
                       class="w-full px-3 py-2 border border-input rounded-md bg-background"></textarea>
-          </div>
-
-          <div>
-            <label for="content" class="block text-sm font-medium mb-2">Content (Markdown & HTML supported)</label>
-            <MarkdownEditor 
-              id="content" 
-              name="content" 
-              required={true}
-              rows={15}
-              placeholder="Write your blog post content here..."
-            />
           </div>
           
           <div>
-            <label for="imageUrl" class="block text-sm font-medium mb-2">Blog Image</label>
+            <label for="thumbnailUrl" class="block text-sm font-medium mb-2">Thumbnail Image</label>
             <div class="space-y-2">
-              <input type="file" id="imageFile" name="imageFile" accept="image/*"
+              <input type="file" id="thumbnailFile" name="thumbnailFile" accept="image/*"
                      class="w-full px-3 py-2 border border-input rounded-md bg-background file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary file:text-primary-foreground hover:file:bg-primary/90" />
               <div class="text-xs text-muted-foreground">
                 Or use URL: 
-                <input type="url" id="imageUrl" name="imageUrl" placeholder="https://example.com/image.jpg"
+                <input type="url" id="thumbnailUrl" name="thumbnailUrl" placeholder="https://example.com/image.jpg"
                        class="ml-2 px-2 py-1 border border-input rounded text-xs bg-background" />
               </div>
               <!-- Image Preview -->
-              <div id="image-preview" class="hidden">
-                <img class="w-48 h-36 object-cover rounded-lg border" alt="Preview" />
+              <div id="thumbnail-preview" class="hidden">
+                <img class="w-32 h-24 object-cover rounded-lg border" alt="Preview" />
                 <p class="text-xs text-muted-foreground mt-1">Current Image</p>
               </div>
             </div>
@@ -68,7 +50,7 @@ const { id } = Astro.params;
           <!-- Image History -->
           <div id="image-history" class="hidden">
             <label class="block text-sm font-medium mb-2">Previous Images</label>
-            <div class="grid grid-cols-6 gap-2" id="history-grid">
+            <div class="grid grid-cols-8 gap-2" id="history-grid">
               <!-- Images will be loaded here -->
             </div>
             <p class="text-xs text-muted-foreground mt-1">Click any previous image to use it again</p>
@@ -76,70 +58,81 @@ const { id } = Astro.params;
           
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label for="author" class="block text-sm font-medium mb-2">Author</label>
-              <input type="text" id="author" name="author" required 
-                     class="w-full px-3 py-2 border border-input rounded-md bg-background" />
+              <label for="category" class="block text-sm font-medium mb-2">Category</label>
+              <select id="category" name="category" required 
+                      class="w-full px-3 py-2 border border-input rounded-md bg-background">
+                <option value="">Select Category</option>
+                <option value="Short Film">Short Film</option>
+                <option value="Commercial">Commercial</option>
+                <option value="Music Video">Music Video</option>
+                <option value="Documentary">Documentary</option>
+              </select>
             </div>
             
             <div>
-              <label for="date" class="block text-sm font-medium mb-2">Date (YYYY-MM-DD)</label>
-              <input type="date" id="date" name="date" required 
+              <label for="year" class="block text-sm font-medium mb-2">Year</label>
+              <input type="text" id="year" name="year" required 
                      class="w-full px-3 py-2 border border-input rounded-md bg-background" />
             </div>
           </div>
           
+          <div>
+            <label for="client" class="block text-sm font-medium mb-2">Client</label>
+            <input type="text" id="client" name="client" required 
+                   class="w-full px-3 py-2 border border-input rounded-md bg-background" />
+          </div>
+          
           <button type="submit" 
                   class="w-full bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md font-medium">
-            Update Blog Post
+            Update Work
           </button>
         </form>
         
-        <div id="blog-message" class="mt-4 hidden"></div>
+        <div id="work-message" class="mt-4 hidden"></div>
       </div>
     </div>
   </div>
 </Layout>
 <script define:vars={{ id }}>
-  let currentBlogPost = null;
+  let currentWork = null;
   
-  // Load blog post data
-  async function loadBlogPostData() {
+  // Load work data
+  async function loadWorkData() {
     try {
-      const response = await fetch(`/api/blog/${id}`);
+      const response = await fetch(`/api/works/${id}`);
       if (!response.ok) {
-        throw new Error('Blog post not found');
+        throw new Error('Work not found');
       }
       
-      currentBlogPost = await response.json();
+      currentWork = await response.json();
       
       // Populate form
-      document.getElementById('title').value = currentBlogPost.title || '';
-      document.getElementById('slug').value = currentBlogPost.slug || '';
-      document.getElementById('excerpt').value = currentBlogPost.excerpt || '';
-      document.getElementById('content').value = currentBlogPost.content || '';
-      document.getElementById('imageUrl').value = currentBlogPost.imageUrl || '';
-      document.getElementById('author').value = currentBlogPost.author || '';
-      document.getElementById('date').value = currentBlogPost.date || '';
+      document.getElementById('title').value = currentWork.title;
+      document.getElementById('description').value = currentWork.description;
+      document.getElementById('thumbnailUrl').value = currentWork.thumbnailUrl;
+      document.getElementById('category').value = currentWork.category;
+      document.getElementById('year').value = currentWork.year;
+      document.getElementById('client').value = currentWork.client;
       
       // Show current image
-      if (currentBlogPost.imageUrl) {
-        showImagePreview(currentBlogPost.imageUrl);
+      if (currentWork.thumbnailUrl) {
+        showImagePreview(currentWork.thumbnailUrl);
       }
       
       // Show image history
-      if (currentBlogPost.imageHistory && currentBlogPost.imageHistory.length > 0) {
-        showImageHistory(currentBlogPost.imageHistory);
+      if (currentWork.imageHistory && currentWork.imageHistory.length > 0) {
+        showImageHistory(currentWork.imageHistory);
       }
     } catch (error) {
-      console.error('Error loading blog post:', error);
-      document.getElementById('blog-message').innerHTML = 
-        '<p class="text-red-600">Error loading blog post data.</p>';
-      document.getElementById('blog-message').classList.remove('hidden');
+      console.error('Error loading work:', error);
+      document.getElementById('work-message').innerHTML = 
+        '<p class="text-red-600">Error loading work data.</p>';
+      document.getElementById('work-message').classList.remove('hidden');
     }
   }
   
   function showImagePreview(url) {
-    const preview = document.getElementById('image-preview');
+    const preview = document.getElementById('thumbnail-preview');
     const img = preview.querySelector('img');
     img.src = url;
     preview.classList.remove('hidden');
@@ -159,16 +152,14 @@ const { id } = Astro.params;
   }
   
   window.selectHistoryImage = function(url) {
-    document.getElementById('imageUrl').value = url;
+    document.getElementById('thumbnailUrl').value = url;
     showImagePreview(url);
   };
   
   // Image preview functionality
-  document.getElementById('imageFile').addEventListener('change', function(e) {
+  document.getElementById('thumbnailFile').addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (file) {
-      // Clear the imageUrl field when a file is selected
-      document.getElementById('imageUrl').value = ''; 
       const reader = new FileReader();
       reader.onload = function(e) {
         showImagePreview(e.target.result);
@@ -178,7 +169,7 @@ const { id } = Astro.params;
   });
   
   // URL preview functionality
-  document.getElementById('imageUrl').addEventListener('input', function(e) {
+  document.getElementById('thumbnailUrl').addEventListener('input', function(e) {
     const url = e.target.value;
     if (url && url.startsWith('http')) {
       showImagePreview(url);
@@ -186,7 +177,7 @@ const { id } = Astro.params;
   });
   
   // Form submission
-  document.getElementById('edit-blog-form').addEventListener('submit', async (e) => {
+  document.getElementById('edit-work-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const formData = new FormData(e.target);
@@ -197,7 +188,7 @@ const { id } = Astro.params;
     submitBtn.disabled = true;
     
     try {
-      const response = await fetch(`/api/blog/${id}`, {
+      const response = await fetch(`/api/works/${id}`, {
         method: 'PUT',
         body: formData,
       });
@@ -205,19 +196,19 @@ const { id } = Astro.params;
       const result = await response.json();
       
       if (response.ok) {
-        document.getElementById('blog-message').innerHTML = 
-          '<p class="text-green-600">Blog post updated successfully!</p>';
-        document.getElementById('blog-message').classList.remove('hidden');
+        document.getElementById('work-message').innerHTML = 
+          '<p class="text-green-600">Work updated successfully!</p>';
+        document.getElementById('work-message').classList.remove('hidden');
         
         // Reload to show updated image history
-        setTimeout(loadBlogPostData, 1000);
+        setTimeout(loadWorkData, 1000);
       } else {
-        throw new Error(result.error || 'Failed to update blog post');
+        throw new Error(result.error || 'Failed to update work');
       }
     } catch (error) {
-      document.getElementById('blog-message').innerHTML = 
+      document.getElementById('work-message').innerHTML = 
         `<p class="text-red-600">Error: ${error.message}</p>`;
-      document.getElementById('blog-message').classList.remove('hidden');
+      document.getElementById('work-message').classList.remove('hidden');
     } finally {
       submitBtn.textContent = originalText;
       submitBtn.disabled = false;
@@ -225,10 +216,10 @@ const { id } = Astro.params;
     
     // Hide message after 3 seconds
     setTimeout(() => {
-      document.getElementById('blog-message').classList.add('hidden');
+      document.getElementById('work-message').classList.add('hidden');
     }, 3000);
   });
   
   // Load data on page load
-  loadBlogPostData();
+  loadWorkData();
 </script>

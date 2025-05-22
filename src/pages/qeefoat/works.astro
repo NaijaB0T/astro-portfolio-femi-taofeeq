@@ -5,12 +5,12 @@ import Layout from '../../layouts/Layout.astro';
 import '../../styles/globals.css';
 ---
 
-<Layout title="Manage Works - Admin">
+<Layout title="Manage Works - Qeefoat">
   <div class="container mx-auto px-4 py-12">
     <div class="max-w-4xl mx-auto">
       <div class="flex items-center justify-between mb-8">
         <h1 class="text-4xl font-bold">Manage Works</h1>
-        <a href="/admin" class="text-primary hover:underline">← Back to Admin</a>
+        <a href="/qeefoat" class="text-primary hover:underline">← Back to Qeefoat</a>
       </div>
       
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -103,7 +103,7 @@ import '../../styles/globals.css';
   // Load and display current works
   async function loadWorks() {
     try {
-      const response = await fetch('/api/admin/works'); // Use admin API
+      const response = await fetch('/api/qeefoat/works'); // Use qeefoat API
       const works = await response.json();
       
       const worksList = document.getElementById('works-list');
@@ -122,7 +122,7 @@ import '../../styles/globals.css';
               ${work.archived ? '<span class="text-xs text-red-600 font-medium">ARCHIVED</span>' : ''}
             </div>
             <div class="flex gap-2">
-              <a href="/admin/works/edit/${work.id}" 
+              <a href="/qeefoat/works/edit/${work.id}" 
                  class="text-blue-600 hover:text-blue-800 text-sm px-2 py-1 rounded hover:bg-blue-50 transition-colors">
                 Edit
               </a>

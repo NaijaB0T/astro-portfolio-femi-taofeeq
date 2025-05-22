@@ -21,7 +21,7 @@ try {
 const { blogPosts } = {
   blogPosts: portfolioData.blogPosts
     .filter(post => !post.archived)
-    .sort((a, b) => b.date.localeCompare(a.date))
+    .sort((a, b) => parseInt(b.id) - parseInt(a.id))
 };
 
 function formatDate(dateString: string): string {

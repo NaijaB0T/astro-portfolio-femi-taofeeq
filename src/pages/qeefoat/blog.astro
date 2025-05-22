@@ -6,12 +6,12 @@ import MarkdownEditor from '../../components/MarkdownEditor.astro';
 import '../../styles/globals.css';
 ---
 
-<Layout title="Manage Blog - Admin">
+<Layout title="Manage Blog - Qeefoat">
   <div class="container mx-auto px-4 py-12">
     <div class="max-w-6xl mx-auto">
       <div class="flex items-center justify-between mb-8">
         <h1 class="text-4xl font-bold">Manage Blog Posts</h1>
-        <a href="/admin" class="text-primary hover:underline">← Back to Admin</a>
+        <a href="/qeefoat" class="text-primary hover:underline">← Back to Qeefoat</a>
       </div>
       
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -132,7 +132,7 @@ import '../../styles/globals.css';
   // Load and display current blog posts
   async function loadBlogPosts() {
     try {
-      const response = await fetch('/api/admin/blog'); // Use admin API
+      const response = await fetch('/api/qeefoat/blog'); // Use qeefoat API
       const posts = await response.json();
       
       const blogList = document.getElementById('blog-list');
@@ -151,7 +151,7 @@ import '../../styles/globals.css';
               ${post.archived ? '<span class="text-xs text-red-600 font-medium block mt-1">ARCHIVED</span>' : ''}
             </div>
             <div class="flex gap-2">
-              <a href="/admin/blog/edit/${post.id}" 
+              <a href="/qeefoat/blog/edit/${post.id}" 
                  class="text-blue-600 hover:text-blue-800 text-sm px-2 py-1 rounded hover:bg-blue-50 transition-colors">
                 Edit
               </a>
