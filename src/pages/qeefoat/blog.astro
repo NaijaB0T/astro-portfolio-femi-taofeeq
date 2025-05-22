@@ -19,63 +19,97 @@ import '../../styles/globals.css';
         <div class="bg-card border rounded-lg p-6">
           <h2 class="text-2xl font-semibold mb-6">Add New Blog Post</h2>
           <form id="add-blog-form" class="space-y-4">
-            <div>
-              <label for="title" class="block text-sm font-medium mb-2">Title</label>
-              <input type="text" id="title" name="title" required 
-                     class="w-full px-3 py-2 border border-input rounded-md bg-background" />
+            <!-- Blog Header Info -->
+            <div class="border-b pb-4 mb-4">
+              <h3 class="text-lg font-medium mb-3">📄 Blog Header</h3>
+              <div class="space-y-4">
+                <div>
+                  <label for="title" class="block text-sm font-medium mb-2">Title</label>
+                  <input type="text" id="title" name="title" required 
+                         class="w-full px-3 py-2 border border-input rounded-md bg-background" />
+                </div>
+                
+                <div>
+                  <label for="slug" class="block text-sm font-medium mb-2">Slug (URL)</label>
+                  <input type="text" id="slug" name="slug" required 
+                         class="w-full px-3 py-2 border border-input rounded-md bg-background" 
+                         placeholder="e.g., my-blog-post" />
+                </div>
+                
+                <div>
+                  <label for="excerpt" class="block text-sm font-medium mb-2">Excerpt</label>
+                  <textarea id="excerpt" name="excerpt" required rows="2"
+                            class="w-full px-3 py-2 border border-input rounded-md bg-background"></textarea>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label for="author" class="block text-sm font-medium mb-2">Author</label>
+                    <input type="text" id="author" name="author" value="Femi Taofeeq" required 
+                           class="w-full px-3 py-2 border border-input rounded-md bg-background" />
+                  </div>              
+                  <div>
+                    <label for="date" class="block text-sm font-medium mb-2">Date</label>
+                    <input type="date" id="date" name="date" required 
+                           class="w-full px-3 py-2 border border-input rounded-md bg-background" />
+                  </div>
+                </div>
+                
+                <div>
+                  <label for="imageUrl" class="block text-sm font-medium mb-2">Featured Image</label>
+                  <div class="space-y-2">
+                    <input type="file" id="imageFile" name="imageFile" accept="image/*"
+                           class="w-full px-3 py-2 border border-input rounded-md bg-background file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary file:text-primary-foreground hover:file:bg-primary/90" />
+                    <div class="text-xs text-muted-foreground">
+                      Or use URL: 
+                      <input type="url" id="imageUrl" name="imageUrl" placeholder="https://example.com/image.jpg"
+                             class="ml-2 px-2 py-1 border border-input rounded text-xs bg-background" />
+                    </div>
+                    <!-- Image Preview -->
+                    <div id="image-preview" class="hidden">
+                      <img class="w-48 h-32 object-cover rounded-lg border" alt="Preview" />
+                      <p class="text-xs text-muted-foreground mt-1">Preview</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            
+
+            <!-- Blog Sections -->
             <div>
-              <label for="slug" class="block text-sm font-medium mb-2">Slug (URL)</label>
-              <input type="text" id="slug" name="slug" required 
-                     class="w-full px-3 py-2 border border-input rounded-md bg-background" 
-                     placeholder="e.g., my-blog-post" />
-            </div>
-            
-            <div>
-              <label for="excerpt" class="block text-sm font-medium mb-2">Excerpt</label>
-              <textarea id="excerpt" name="excerpt" required rows="2"
-                        class="w-full px-3 py-2 border border-input rounded-md bg-background"></textarea>
-            </div>
-            
-            <div>
-              <label for="content" class="block text-sm font-medium mb-2">Content (Markdown & HTML supported)</label>
-              <MarkdownEditor 
-                id="content" 
-                name="content" 
-                required={true}
-                rows={12}
-                placeholder="Write your blog post content using Markdown or HTML..."
-              />
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label for="author" class="block text-sm font-medium mb-2">Author</label>
-                <input type="text" id="author" name="author" value="Femi Taofeeq" required 
-                       class="w-full px-3 py-2 border border-input rounded-md bg-background" />
-              </div>              
-              <div>
-                <label for="date" class="block text-sm font-medium mb-2">Date</label>
-                <input type="date" id="date" name="date" required 
-                       class="w-full px-3 py-2 border border-input rounded-md bg-background" />
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-lg font-medium">📝 Blog Sections</h3>
+                <button type="button" id="add-section-btn" 
+                        class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm">
+                  + Add Section
+                </button>
+              </div>
+              <div id="sections-container" class="space-y-4">
+                <!-- Sections will be added here -->
+              </div>
+              <div class="text-sm text-muted-foreground mt-2">
+                💡 Create structured blog posts with multiple sections like Intro, Main Points, Conclusion, etc.
               </div>
             </div>
             
-            <div>
-              <label for="imageUrl" class="block text-sm font-medium mb-2">Featured Image</label>
-              <div class="space-y-2">
-                <input type="file" id="imageFile" name="imageFile" accept="image/*"
-                       class="w-full px-3 py-2 border border-input rounded-md bg-background file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary file:text-primary-foreground hover:file:bg-primary/90" />
-                <div class="text-xs text-muted-foreground">
-                  Or use URL: 
-                  <input type="url" id="imageUrl" name="imageUrl" placeholder="https://example.com/image.jpg"
-                         class="ml-2 px-2 py-1 border border-input rounded text-xs bg-background" />
-                </div>
-                <!-- Image Preview -->
-                <div id="image-preview" class="hidden">
-                  <img class="w-48 h-32 object-cover rounded-lg border" alt="Preview" />
-                  <p class="text-xs text-muted-foreground mt-1">Preview</p>
+            <!-- Legacy Content (for backward compatibility) -->
+            <div class="border-t pt-4">
+              <div class="flex items-center justify-between mb-2">
+                <label for="content" class="block text-sm font-medium">Legacy Content (Optional)</label>
+                <button type="button" id="toggle-legacy" class="text-xs text-muted-foreground hover:text-foreground">
+                  Show Legacy Editor
+                </button>
+              </div>
+              <div id="legacy-content" class="hidden">
+                <MarkdownEditor 
+                  id="content" 
+                  name="content" 
+                  required={false}
+                  rows={6}
+                  placeholder="Optional: Add content here if not using sections above..."
+                />
+                <div class="text-xs text-muted-foreground mt-1">
+                  This field is for backward compatibility. Use sections above for better organization.
                 </div>
               </div>
             </div>
@@ -97,7 +131,7 @@ import '../../styles/globals.css';
             
             <button type="submit" 
                     class="w-full bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md font-medium">
-              Add Blog Post
+              Create Blog Post
             </button>
           </form>
           
@@ -117,6 +151,8 @@ import '../../styles/globals.css';
 </Layout>
 
 <script>
+  let sectionCounter = 0;
+  
   // Set today's date as default
   document.getElementById('date').value = new Date().toISOString().split('T')[0];
   
@@ -128,6 +164,84 @@ import '../../styles/globals.css';
       .replace(/(^-|-$)/g, '');
     document.getElementById('slug').value = slug;
   });
+
+  // Toggle legacy content editor
+  document.getElementById('toggle-legacy').addEventListener('click', () => {
+    const legacyContent = document.getElementById('legacy-content');
+    const toggleBtn = document.getElementById('toggle-legacy');
+    
+    if (legacyContent.classList.contains('hidden')) {
+      legacyContent.classList.remove('hidden');
+      toggleBtn.textContent = 'Hide Legacy Editor';
+    } else {
+      legacyContent.classList.add('hidden');
+      toggleBtn.textContent = 'Show Legacy Editor';
+    }
+  });
+
+  // Add section functionality
+  document.getElementById('add-section-btn').addEventListener('click', () => {
+    addSection();
+  });
+
+  function addSection(subtitle = '', content = '', imageUrl = '') {
+    sectionCounter++;
+    const sectionsContainer = document.getElementById('sections-container');
+    
+    const sectionDiv = document.createElement('div');
+    sectionDiv.className = 'border rounded-lg p-4 bg-background';
+    sectionDiv.innerHTML = `
+      <div class="flex items-center justify-between mb-3">
+        <h4 class="font-medium">Section ${sectionCounter}</h4>
+        <button type="button" onclick="removeSection(this)" 
+                class="text-red-600 hover:text-red-800 text-sm px-2 py-1 rounded hover:bg-red-50">
+          Remove
+        </button>
+      </div>
+      
+      <div class="space-y-3">
+        <div>
+          <label class="block text-sm font-medium mb-1">Section Title/Subtitle</label>
+          <input type="text" name="section-subtitle-${sectionCounter}" 
+                 value="${subtitle}"
+                 placeholder="e.g., Introduction, Main Point, Conclusion"
+                 class="w-full px-3 py-2 border border-input rounded-md bg-background text-sm" />
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium mb-1">Section Content</label>
+          <textarea name="section-content-${sectionCounter}" rows="4" 
+                    placeholder="Write the content for this section (Markdown supported)..."
+                    class="w-full px-3 py-2 border border-input rounded-md bg-background text-sm">${content}</textarea>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium mb-1">Section Image (Optional)</label>
+          <div class="space-y-2">
+            <input type="file" name="section-image-${sectionCounter}" accept="image/*"
+                   class="w-full px-2 py-1 border border-input rounded text-xs bg-background file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-muted" />
+            <input type="url" name="section-image-url-${sectionCounter}" 
+                   value="${imageUrl}"
+                   placeholder="Or paste image URL"
+                   class="w-full px-2 py-1 border border-input rounded text-xs bg-background" />
+          </div>
+        </div>
+      </div>
+    `;
+    
+    sectionsContainer.appendChild(sectionDiv);
+  }
+
+  window.removeSection = function(button) {
+    button.closest('.border.rounded-lg').remove();
+  };
+
+  // Add default sections on page load
+  setTimeout(() => {
+    addSection('Introduction', '', '');
+    addSection('Main Content', '', '');
+    addSection('Conclusion', '', '');
+  }, 100);
   
   // Load and display current blog posts
   async function loadBlogPosts() {
@@ -139,7 +253,7 @@ import '../../styles/globals.css';
       if (posts.length === 0) {
         blogList.innerHTML = '<p class="text-muted-foreground">No blog posts found.</p>';
         return;
-      }      
+      }
       blogList.innerHTML = posts.map(post => `
         <div class="border rounded-lg p-4 ${post.archived ? 'opacity-50 bg-red-50' : ''}">
           <div class="flex justify-between items-start">
@@ -147,6 +261,10 @@ import '../../styles/globals.css';
               <h3 class="font-semibold">${post.title}</h3>
               <p class="text-sm text-muted-foreground">${post.author} • ${new Date(post.date).toLocaleDateString()}</p>
               <p class="text-sm mt-2">${post.excerpt}</p>
+              ${post.sections && post.sections.length > 0 ? 
+                `<p class="text-xs text-blue-600 mt-1">📝 ${post.sections.length} sections</p>` : 
+                '<p class="text-xs text-gray-500 mt-1">Legacy format</p>'
+              }
               <a href="/blog/${post.slug}" class="text-primary text-sm hover:underline">View Post →</a>
               ${post.archived ? '<span class="text-xs text-red-600 font-medium block mt-1">ARCHIVED</span>' : ''}
             </div>
@@ -199,6 +317,43 @@ import '../../styles/globals.css';
     
     const formData = new FormData(e.target);
     
+    // Collect sections data
+    const sections = [];
+    const sectionElements = document.querySelectorAll('#sections-container > div');
+    
+    sectionElements.forEach((sectionEl, index) => {
+      const subtitleInput = sectionEl.querySelector(`input[name^="section-subtitle-"]`);
+      const contentTextarea = sectionEl.querySelector(`textarea[name^="section-content-"]`);
+      const imageFile = sectionEl.querySelector(`input[name^="section-image-"]`);
+      const imageUrl = sectionEl.querySelector(`input[name^="section-image-url-"]`);
+      
+      if (subtitleInput && contentTextarea) {
+        const section = {
+          subtitle: subtitleInput.value.trim(),
+          content: contentTextarea.value.trim(),
+          order: index
+        };
+        
+        // Add image URL if provided
+        if (imageUrl && imageUrl.value.trim()) {
+          section.imageUrl = imageUrl.value.trim();
+        }
+        
+        // Add section if it has content
+        if (section.subtitle || section.content) {
+          sections.push(section);
+          
+          // Add image file to FormData if provided
+          if (imageFile && imageFile.files[0]) {
+            formData.append(`section-image-${index}`, imageFile.files[0]);
+          }
+        }
+      }
+    });
+    
+    // Add sections data to form
+    formData.append('sections', JSON.stringify(sections));
+    
     // Show loading state
     const submitBtn = e.target.querySelector('button[type="submit"]');
     const originalText = submitBtn.textContent;
@@ -219,6 +374,16 @@ import '../../styles/globals.css';
         document.getElementById('blog-message').classList.remove('hidden');
         e.target.reset();
         document.getElementById('date').value = new Date().toISOString().split('T')[0];
+        
+        // Clear sections and add default ones
+        document.getElementById('sections-container').innerHTML = '';
+        sectionCounter = 0;
+        setTimeout(() => {
+          addSection('Introduction', '', '');
+          addSection('Main Content', '', '');
+          addSection('Conclusion', '', '');
+        }, 100);
+        
         loadBlogPosts(); // Reload the blog posts list
       } else {
         throw new Error(result.error || 'Failed to publish blog post');

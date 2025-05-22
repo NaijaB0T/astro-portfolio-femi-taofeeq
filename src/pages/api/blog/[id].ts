@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { getPortfolioData, savePortfolioData } from '../../../lib/data';
 import { uploadImageToR2, validateImageFile } from '../../../lib/upload';
+import type { BlogPostSection } from '../../../lib/types';
 
 export const GET: APIRoute = async ({ params, locals }) => {
   try {
@@ -67,19 +68,81 @@ export const PUT: APIRoute = async ({ params, request, locals }) => {
     const date = formData.get('date') as string;
     const imageFile = formData.get('imageFile') as File;
     const imageUrl = formData.get('imageUrl') as string;
+    const sectionsJson = formData.get('sections') as string;
 
     // Handle image upload if a new file is provided
-    let newImageUrl = currentPost.imageUrl;
+    let newImageUrl = imageUrl || currentPost.imageUrl;
+    let imageHistory = currentPost.imageHistory || [];
+    
     if (imageFile && imageFile.size > 0) {
-      const validationError = validateImageFile(imageFile);
-      if (validationError) {
-        return new Response(JSON.stringify({ error: validationError }), {
+      const validation = validateImageFile(imageFile);
+      if (!validation.valid) {
+        return new Response(JSON.stringify({ error: validation.error }), {
           status: 400,
           headers: { 'Content-Type': 'application/json' },
         });
       }
+      
+      // Add current image to history before replacing
+      if (currentPost.imageUrl && !imageHistory.includes(currentPost.imageUrl)) {
+        imageHistory.push(currentPost.imageUrl);
+      }
+      
       const uploadResult = await uploadImageToR2(locals.runtime.env, imageFile, 'blog');
       newImageUrl = uploadResult.url;
+    } else if (imageUrl && imageUrl !== currentPost.imageUrl) {
+      // URL changed, add old one to history
+      if (currentPost.imageUrl && !imageHistory.includes(currentPost.imageUrl)) {
+        imageHistory.push(currentPost.imageUrl);
+      }
+    }
+
+    // Process sections if provided
+    let processedSections: BlogPostSection[] = [];
+    if (sectionsJson) {
+      try {
+        const sections = JSON.parse(sectionsJson);
+        
+        for (let i = 0; i < sections.length; i++) {
+          const section = sections[i];
+          let sectionImageUrl = section.imageUrl;
+          
+          // Check for section image file
+          const sectionImageFile = formData.get(`section-image-${i}`) as File;
+          if (sectionImageFile && sectionImageFile.size > 0) {
+            const validation = validateImageFile(sectionImageFile);
+            if (!validation.valid) {
+              return new Response(JSON.stringify({ error: `Section ${i + 1} image: ${validation.error}` }), {
+                status: 400,
+                headers: { 'Content-Type': 'application/json' },
+              });
+            }
+            
+            console.log('Uploading section image:', sectionImageFile.name);
+            const uploadResult = await uploadImageToR2(locals.runtime.env, sectionImageFile, 'blog-sections');
+            sectionImageUrl = uploadResult.url;
+          }
+          
+          if (section.subtitle || section.content) {
+            processedSections.push({
+              id: section.id || String(Date.now()) + '-' + i,
+              subtitle: section.subtitle || '',
+              content: section.content || '',
+              imageUrl: sectionImageUrl,
+              order: section.order || i,
+            });
+          }
+        }
+        
+        // Sort sections by order
+        processedSections.sort((a, b) => a.order - b.order);
+      } catch (error) {
+        console.error('Error processing sections:', error);
+        return new Response(JSON.stringify({ error: 'Invalid sections data' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
     }
 
     // Update the post data
@@ -88,10 +151,12 @@ export const PUT: APIRoute = async ({ params, request, locals }) => {
       title: title || currentPost.title,
       slug: slug || currentPost.slug,
       excerpt: excerpt || currentPost.excerpt,
-      content: content || currentPost.content,
+      content: content !== undefined ? content : currentPost.content, // Keep for backward compatibility
+      sections: processedSections.length > 0 ? processedSections : currentPost.sections,
       author: author || currentPost.author,
       date: date || currentPost.date,
       imageUrl: newImageUrl,
+      imageHistory: imageHistory,
     };
 
     await savePortfolioData(locals.runtime.env, data);

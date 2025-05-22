@@ -10,15 +10,24 @@ export interface Work {
   archived?: boolean;
 }
 
+export interface BlogPostSection {
+  id: string;
+  subtitle: string;
+  content: string;
+  imageUrl?: string;
+  order: number; // To maintain section order
+}
+
 export interface BlogPost {
   id: string;
   slug: string;
   title: string;
-  content: string;
+  content: string; // Keep for backward compatibility
+  sections?: BlogPostSection[]; // New sectioned content
   author: string;
   date: string;
   excerpt: string;
-  imageUrl: string;
+  imageUrl: string; // Main/header image
   imageHistory?: string[]; // Previous images
   archived?: boolean;
 }
