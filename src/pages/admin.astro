@@ -1,0 +1,60 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Card from '../components/ui/Card.astro';
+import CardHeader from '../components/ui/CardHeader.astro';
+import CardTitle from '../components/ui/CardTitle.astro';
+import CardContent from '../components/ui/CardContent.astro';
+import '../styles/globals.css';
+---
+
+<Layout title="Admin - FemiTaofeeq Portfolio">
+  <div class="container mx-auto px-4 py-12">
+    <div class="max-w-4xl mx-auto">
+      <h1 class="text-4xl font-bold mb-8">Admin Panel</h1>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Works Management</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p class="text-muted-foreground mb-4">
+              Add, edit, or remove portfolio works.
+            </p>
+            <a href="/admin/works" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full">
+              Manage Works
+            </a>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Blog Management</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p class="text-muted-foreground mb-4">
+              Create, edit, or delete blog posts.
+            </p>
+            <a href="/admin/blog" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full">
+              Manage Blog Posts
+            </a>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>About Page</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p class="text-muted-foreground mb-4">
+              Update your about page content and image.
+            </p>
+            <a href="/admin/about" class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full">
+              Manage About
+            </a>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  </div>
+</Layout>

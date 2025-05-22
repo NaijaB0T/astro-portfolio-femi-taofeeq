@@ -1,0 +1,260 @@
+---
+import Logo from './Logo.astro';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<div class={`menu-pill-container ${className || ''}`}>
+  <!-- Menu Pill -->
+  <button id="menuPill" class="menu-pill">
+    <span class="menu-text">Menu</span>
+    <div class="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </button>
+  
+  <!-- Full Screen Overlay -->
+  <div id="menuOverlay" class="menu-overlay">
+    <div class="menu-content">
+      <button id="closeMenu" class="close-menu">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      
+      <div class="menu-grid">
+        <!-- Brand Section -->
+        <div class="menu-section">
+          <div class="brand-section">
+            <div class="flex items-center mb-6">
+              <Logo width={48} height={48} class="text-white mr-4" />
+              <div>
+                <h2 class="text-2xl font-bold text-white">FemiTaofeeq</h2>
+                <p class="text-white/60 text-sm">Lagos based cinematographer</p>
+              </div>
+            </div>
+          </div>
+          
+          <h3 class="menu-section-title">Navigation</h3>
+          <nav class="menu-nav">
+            <a href="/" class="menu-link group">
+              <span class="menu-link-text">Works</span>
+              <span class="menu-link-desc">Portfolio & Projects</span>
+            </a>
+            <a href="/blog" class="menu-link group">
+              <span class="menu-link-text">Blog</span>
+              <span class="menu-link-desc">Articles & Insights</span>
+            </a>
+            <a href="/about" class="menu-link group">
+              <span class="menu-link-text">About</span>
+              <span class="menu-link-desc">Background & Story</span>
+            </a>
+            <a href="/admin" class="menu-link group">
+              <span class="menu-link-text">Admin</span>
+              <span class="menu-link-desc">Content Management</span>
+            </a>
+          </nav>
+        </div>
+        
+        <!-- Contact & Social -->
+        <div class="menu-section">
+          <h3 class="menu-section-title">Connect</h3>
+          <div class="contact-info">
+            <a href="tel:+2348130091235" class="contact-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+              </svg>
+              <span>+234 813 009 1235</span>
+            </a>
+            
+            <div class="social-links">
+              <a href="https://instagram.com/fs_cinema" target="_blank" rel="noopener" class="social-link">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
+                  <circle cx="12" cy="12" r="3"/>
+                  <circle cx="17.5" cy="6.5" r="1"/>
+                </svg>
+                <span>Instagram</span>
+              </a>
+              
+              <a href="https://twitter.com/femisuccess7" target="_blank" rel="noopener" class="social-link">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/>
+                </svg>
+                <span>Twitter</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Footer -->
+      <div class="menu-footer">
+        <p class="footer-text">Lagos based cinematographer</p>
+        <p class="footer-copy">&copy; 2024 FemiTaofeeq</p>
+      </div>
+    </div>
+  </div>
+</div>
+<style>
+  .menu-pill-container {
+    @apply relative z-50;
+  }
+  
+  .menu-pill {
+    @apply fixed top-6 right-6 bg-black/80 backdrop-blur-xl rounded-full;
+    @apply flex items-center gap-3 px-6 py-3;
+    @apply border border-white/20 text-white;
+    @apply hover:bg-black/90 transition-all duration-300;
+    @apply focus:outline-none focus:ring-2 focus:ring-white/30;
+  }
+  
+  .menu-text {
+    @apply text-sm font-medium;
+  }
+  
+  .hamburger {
+    @apply flex flex-col gap-1;
+  }
+  
+  .hamburger span {
+    @apply w-4 h-0.5 bg-white rounded-full transition-all duration-300;
+  }
+  
+  .menu-pill.active .hamburger span:nth-child(1) {
+    @apply rotate-45 translate-y-1.5;
+  }
+  
+  .menu-pill.active .hamburger span:nth-child(2) {
+    @apply opacity-0;
+  }
+  
+  .menu-pill.active .hamburger span:nth-child(3) {
+    @apply -rotate-45 -translate-y-1.5;
+  }
+  
+  .menu-overlay {
+    @apply fixed inset-0 bg-black/95 backdrop-blur-xl;
+    @apply flex items-center justify-center;
+    @apply opacity-0 pointer-events-none;
+    @apply transition-all duration-500 ease-out;
+    z-index: 60;
+  }
+  
+  .menu-overlay.active {
+    @apply opacity-100 pointer-events-auto;
+  }
+  
+  .menu-content {
+    @apply relative w-full max-w-4xl mx-auto p-6 sm:p-8; /* Adjust padding for smaller screens */
+    @apply text-white overflow-y-auto; /* Allow vertical scrolling */
+    max-height: 100vh; /* Ensure it doesn't exceed viewport height */
+  }
+  
+  .close-menu {
+    @apply absolute top-0 right-0 p-4;
+    @apply text-white/70 hover:text-white;
+    @apply transition-colors duration-300;
+  }
+  
+  .menu-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 mt-16; /* Adjust gap for smaller screens */
+  }
+  
+  .menu-section-title {
+    @apply text-sm font-semibold uppercase tracking-wider;
+    @apply text-white/60 mb-6;
+  }
+  
+  .menu-nav {
+    @apply space-y-4;
+  }
+  
+  .menu-link {
+    @apply block;
+    @apply hover:text-white transition-colors duration-300;
+  }
+  
+  .menu-link-text {
+    @apply text-3xl font-bold mb-1 block;
+    @apply group-hover:text-primary transition-colors duration-300;
+  }
+  
+  .menu-link-desc {
+    @apply text-white/60 text-sm;
+  }
+  
+  .contact-info {
+    @apply space-y-6;
+  }
+  
+  .contact-item {
+    @apply flex items-center gap-3;
+    @apply text-white/80 hover:text-white;
+    @apply transition-colors duration-300;
+  }
+  
+  .social-links {
+    @apply space-y-3;
+  }
+  
+  .social-link {
+    @apply flex items-center gap-3;
+    @apply text-white/80 hover:text-white;
+    @apply transition-colors duration-300;
+  }
+  
+  .menu-footer {
+    @apply mt-16 pt-8 border-t border-white/20;
+    @apply text-center text-white/60 text-sm;
+  }
+  
+  .footer-copy {
+    @apply mt-2;
+  }
+</style>
+<script>
+  // Menu functionality
+  const menuPill = document.getElementById('menuPill');
+  const menuOverlay = document.getElementById('menuOverlay');
+  const closeMenu = document.getElementById('closeMenu');
+  
+  function openMenu() {
+    menuPill.classList.add('active');
+    menuOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  
+  function closeMenuFunc() {
+    menuPill.classList.remove('active');
+    menuOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+  
+  menuPill.addEventListener('click', openMenu);
+  closeMenu.addEventListener('click', closeMenuFunc);
+  
+  // Close on overlay click
+  menuOverlay.addEventListener('click', (e) => {
+    if (e.target === menuOverlay) closeMenuFunc();
+  });
+  
+  // Close on ESC key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && menuOverlay.classList.contains('active')) {
+      closeMenuFunc();
+    }
+  });
+  
+  // Close menu when clicking nav links
+  document.querySelectorAll('.menu-link').forEach(link => {
+    link.addEventListener('click', closeMenuFunc);
+  });
+</script>

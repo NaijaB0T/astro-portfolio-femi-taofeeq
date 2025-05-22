@@ -1,0 +1,61 @@
+---
+import DynamicIsland from '../components/DynamicIsland.astro';
+import Logo from '../components/Logo.astro';
+import MenuPill from '../components/MenuPill.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "Portfolio of FemiTaofeeq - Lagos based cinematographer" } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content={description} />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+  </head>
+  <body>
+    <header class="border-b">
+      <div class="container mx-auto px-4 py-4">
+        <div class="flex items-center">
+          <a href="/" class="flex items-center hover:opacity-80 transition-opacity">
+            <Logo width={40} height={40} class="text-foreground mr-3" />
+            <span class="text-xl font-bold">FemiTaofeeq</span>
+          </a>
+        </div>
+      </div>
+    </header>
+    
+    <!-- Menu Pill -->
+    <MenuPill />
+    
+    <main>
+      <slot />
+    </main>    
+    
+    <!-- Dynamic Island -->
+    <DynamicIsland />
+    
+    <footer class="border-t mt-16">
+      <div class="container mx-auto px-4 py-8">
+        <div class="text-center text-muted-foreground">
+          <p>&copy; 2024 FemiTaofeeq. All rights reserved.</p>
+          <p class="mt-2">Lagos based cinematographer</p>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style>
+  html {
+    font-family: system-ui, sans-serif;
+  }
+</style>

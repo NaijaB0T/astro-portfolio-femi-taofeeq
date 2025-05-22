@@ -1,62 +1,50 @@
-# Astro Starter Kit: Blog
+# FemiTaofeeq Portfolio Website
 
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cloudflare/templates/tree/main/astro-blog-starter-template)
+A beautiful portfolio website for FemiTaofeeq, a Lagos-based cinematographer, built with Astro, Cloudflare Workers, and R2 storage.
 
-![Astro Template Preview](https://github.com/withastro/astro/assets/2244813/ff10799f-a816-4703-b967-c78997e8323d)
+## Features
 
-<!-- dash-content-start -->
+- **Portfolio Grid**: Showcase of cinematography works with thumbnails
+- **Blog System**: Articles about cinematography and filmmaking
+- **Admin Panel**: Content management system to add/edit works and blog posts
+- **R2 Storage**: Data stored in Cloudflare R2 as JSON
+- **Responsive Design**: Built with Tailwind CSS and shadcn/ui components
+- **Fast Performance**: Astro static site generation with Cloudflare Workers
 
-Create a blog with Astro and deploy it on Cloudflare Workers as a [static website](https://developers.cloudflare.com/workers/static-assets/).
+## Setup Instructions
 
-Features:
-
-- ✅ Minimal styling (make it your own!)
-- ✅ 100/100 Lighthouse performance
-- ✅ SEO-friendly with canonical URLs and OpenGraph data
-- ✅ Sitemap support
-- ✅ RSS Feed support
-- ✅ Markdown & MDX support
-
-<!-- dash-content-end -->
-
-## Getting Started
-
-Outside of this repo, you can start a new project with this template using [C3](https://developers.cloudflare.com/pages/get-started/c3/) (the `create-cloudflare` CLI):
-
+### 1. Install Dependencies
 ```bash
-npm create cloudflare@latest -- --template=cloudflare/templates/astro-blog-starter-template
+npm install
 ```
 
-A live public deployment of this template is available at [https://astro-blog-starter-template.templates.workers.dev](https://astro-blog-starter-template.templates.workers.dev)
+### 2. Create R2 Bucket
+1. Go to Cloudflare Dashboard > R2 Object Storage
+2. Create a new bucket named `femi-portfolio-data`
+3. Note down your account ID
 
-## 🚀 Project Structure
+### 3. Configure Wrangler
+Update your Cloudflare account ID in `wrangler.json` if needed.
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+### 4. Development
+```bash
+npm run dev
+```
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+### 5. Deploy
+```bash
+npm run deploy
+```
 
-The `src/content/` directory contains "collections" of related Markdown and MDX documents. Use `getCollection()` to retrieve posts from `src/content/blog/`, and type-check your frontmatter using an optional schema. See [Astro's Content Collections docs](https://docs.astro.build/en/guides/content-collections/) to learn more.
+## Technologies Used
 
-Any static assets, like images, can be placed in the `public/` directory.
+- **Astro** - Static site generator
+- **Cloudflare Workers** - Serverless runtime
+- **Cloudflare R2** - Object storage
+- **Tailwind CSS** - Styling
+- **shadcn/ui** - UI components
+- **TypeScript** - Type safety
 
-## 🧞 Commands
+## License
 
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-| `npm run deploy`          | Deploy your production site to Cloudflare        |
-
-## 👀 Want to learn more?
-
-Check out [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
-
-## Credit
-
-This theme is based off of the lovely [Bear Blog](https://github.com/HermanMartinus/bearblog/).
+© 2024 FemiTaofeeq. All rights reserved.

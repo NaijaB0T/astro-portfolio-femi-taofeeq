@@ -1,0 +1,276 @@
+---
+export const prerender = false;
+
+import Layout from '../../layouts/Layout.astro';
+import MarkdownEditor from '../../components/MarkdownEditor.astro';
+import '../../styles/globals.css';
+---
+
+<Layout title="Manage Blog - Admin">
+  <div class="container mx-auto px-4 py-12">
+    <div class="max-w-6xl mx-auto">
+      <div class="flex items-center justify-between mb-8">
+        <h1 class="text-4xl font-bold">Manage Blog Posts</h1>
+        <a href="/admin" class="text-primary hover:underline">← Back to Admin</a>
+      </div>
+      
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Add Blog Post Form -->
+        <div class="bg-card border rounded-lg p-6">
+          <h2 class="text-2xl font-semibold mb-6">Add New Blog Post</h2>
+          <form id="add-blog-form" class="space-y-4">
+            <div>
+              <label for="title" class="block text-sm font-medium mb-2">Title</label>
+              <input type="text" id="title" name="title" required 
+                     class="w-full px-3 py-2 border border-input rounded-md bg-background" />
+            </div>
+            
+            <div>
+              <label for="slug" class="block text-sm font-medium mb-2">Slug (URL)</label>
+              <input type="text" id="slug" name="slug" required 
+                     class="w-full px-3 py-2 border border-input rounded-md bg-background" 
+                     placeholder="e.g., my-blog-post" />
+            </div>
+            
+            <div>
+              <label for="excerpt" class="block text-sm font-medium mb-2">Excerpt</label>
+              <textarea id="excerpt" name="excerpt" required rows="2"
+                        class="w-full px-3 py-2 border border-input rounded-md bg-background"></textarea>
+            </div>
+            
+            <div>
+              <label for="content" class="block text-sm font-medium mb-2">Content (Markdown & HTML supported)</label>
+              <MarkdownEditor 
+                id="content" 
+                name="content" 
+                required={true}
+                rows={12}
+                placeholder="Write your blog post content using Markdown or HTML..."
+              />
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label for="author" class="block text-sm font-medium mb-2">Author</label>
+                <input type="text" id="author" name="author" value="Femi Taofeeq" required 
+                       class="w-full px-3 py-2 border border-input rounded-md bg-background" />
+              </div>              
+              <div>
+                <label for="date" class="block text-sm font-medium mb-2">Date</label>
+                <input type="date" id="date" name="date" required 
+                       class="w-full px-3 py-2 border border-input rounded-md bg-background" />
+              </div>
+            </div>
+            
+            <div>
+              <label for="imageUrl" class="block text-sm font-medium mb-2">Featured Image</label>
+              <div class="space-y-2">
+                <input type="file" id="imageFile" name="imageFile" accept="image/*"
+                       class="w-full px-3 py-2 border border-input rounded-md bg-background file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary file:text-primary-foreground hover:file:bg-primary/90" />
+                <div class="text-xs text-muted-foreground">
+                  Or use URL: 
+                  <input type="url" id="imageUrl" name="imageUrl" placeholder="https://example.com/image.jpg"
+                         class="ml-2 px-2 py-1 border border-input rounded text-xs bg-background" />
+                </div>
+                <!-- Image Preview -->
+                <div id="image-preview" class="hidden">
+                  <img class="w-48 h-32 object-cover rounded-lg border" alt="Preview" />
+                  <p class="text-xs text-muted-foreground mt-1">Preview</p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Markdown Guide -->
+            <div class="bg-muted/50 p-4 rounded-lg">
+              <h4 class="text-sm font-semibold mb-2">📝 Markdown Quick Reference</h4>
+              <div class="grid grid-cols-2 gap-2 text-xs">
+                <div><code>**bold**</code> → <strong>bold</strong></div>
+                <div><code>*italic*</code> → <em>italic</em></div>
+                <div><code># Heading 1</code> → H1</div>
+                <div><code>## Heading 2</code> → H2</div>
+                <div><code>`code`</code> → <code>code</code></div>
+                <div><code>[link](url)</code> → link</div>
+                <div><code>- list item</code> → • list</div>
+                <div><code>> quote</code> → blockquote</div>
+              </div>
+            </div>
+            
+            <button type="submit" 
+                    class="w-full bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md font-medium">
+              Add Blog Post
+            </button>
+          </form>
+          
+          <div id="blog-message" class="mt-4 hidden"></div>
+        </div>
+        
+        <!-- Current Blog Posts List -->
+        <div class="bg-card border rounded-lg p-6">
+          <h2 class="text-2xl font-semibold mb-6">Current Blog Posts</h2>
+          <div id="blog-list" class="space-y-4">
+            <p class="text-muted-foreground">Loading blog posts...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  // Set today's date as default
+  document.getElementById('date').value = new Date().toISOString().split('T')[0];
+  
+  // Auto-generate slug from title
+  document.getElementById('title').addEventListener('input', (e) => {
+    const slug = e.target.value
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+    document.getElementById('slug').value = slug;
+  });
+  
+  // Load and display current blog posts
+  async function loadBlogPosts() {
+    try {
+      const response = await fetch('/api/admin/blog'); // Use admin API
+      const posts = await response.json();
+      
+      const blogList = document.getElementById('blog-list');
+      if (posts.length === 0) {
+        blogList.innerHTML = '<p class="text-muted-foreground">No blog posts found.</p>';
+        return;
+      }      
+      blogList.innerHTML = posts.map(post => `
+        <div class="border rounded-lg p-4 ${post.archived ? 'opacity-50 bg-red-50' : ''}">
+          <div class="flex justify-between items-start">
+            <div class="flex-1">
+              <h3 class="font-semibold">${post.title}</h3>
+              <p class="text-sm text-muted-foreground">${post.author} • ${new Date(post.date).toLocaleDateString()}</p>
+              <p class="text-sm mt-2">${post.excerpt}</p>
+              <a href="/blog/${post.slug}" class="text-primary text-sm hover:underline">View Post →</a>
+              ${post.archived ? '<span class="text-xs text-red-600 font-medium block mt-1">ARCHIVED</span>' : ''}
+            </div>
+            <div class="flex gap-2">
+              <a href="/admin/blog/edit/${post.id}" 
+                 class="text-blue-600 hover:text-blue-800 text-sm px-2 py-1 rounded hover:bg-blue-50 transition-colors">
+                Edit
+              </a>
+              ${!post.archived ? `
+                <button onclick="deleteBlogPost('${post.id}')" 
+                        class="text-red-600 hover:text-red-800 text-sm px-2 py-1 rounded hover:bg-red-50 transition-colors">
+                  Archive
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+      `).join('');
+    } catch (error) {
+      document.getElementById('blog-list').innerHTML = 
+        '<p class="text-red-500">Error loading blog posts.</p>';
+    }
+  }
+  
+  // Delete/Archive blog post
+  window.deleteBlogPost = async function(postId) {
+    if (!confirm('Are you sure you want to archive this blog post? It will be hidden from public view but remain accessible to search engines.')) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(`/api/blog/${postId}`, {
+        method: 'DELETE'
+      });
+      
+      if (response.ok) {
+        loadBlogPosts(); // Reload list
+      } else {
+        const result = await response.json();
+        alert(`Error: ${result.error}`);
+      }
+    } catch (error) {
+      alert(`Error: ${error.message}`);
+    }
+  };
+  
+  // Handle form submission
+  document.getElementById('add-blog-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    
+    // Show loading state
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Publishing...';
+    submitBtn.disabled = true;
+    
+    try {
+      const response = await fetch('/api/blog', {
+        method: 'POST',
+        body: formData, // Send FormData directly, not JSON
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok) {
+        document.getElementById('blog-message').innerHTML = 
+          '<p class="text-green-600">Blog post published successfully!</p>';
+        document.getElementById('blog-message').classList.remove('hidden');
+        e.target.reset();
+        document.getElementById('date').value = new Date().toISOString().split('T')[0];
+        loadBlogPosts(); // Reload the blog posts list
+      } else {
+        throw new Error(result.error || 'Failed to publish blog post');
+      }
+    } catch (error) {
+      document.getElementById('blog-message').innerHTML = 
+        `<p class="text-red-600">Error: ${error.message}</p>`;
+      document.getElementById('blog-message').classList.remove('hidden');
+    } finally {
+      // Reset button state
+      submitBtn.textContent = originalText;
+      submitBtn.disabled = false;
+    }
+    
+    // Hide message after 3 seconds
+    setTimeout(() => {
+      document.getElementById('blog-message').classList.add('hidden');
+    }, 3000);
+  });
+  
+  // Load blog posts on page load
+  loadBlogPosts();
+  
+  // Image preview functionality
+  document.getElementById('imageFile').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const preview = document.getElementById('image-preview');
+    const img = preview.querySelector('img');
+    
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        img.src = e.target.result;
+        preview.classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    } else {
+      preview.classList.add('hidden');
+    }
+  });
+  
+  // URL preview functionality
+  document.getElementById('imageUrl').addEventListener('input', function(e) {
+    const url = e.target.value;
+    const preview = document.getElementById('image-preview');
+    const img = preview.querySelector('img');
+    
+    if (url && url.startsWith('http')) {
+      img.src = url;
+      preview.classList.remove('hidden');
+    } else {
+      preview.classList.add('hidden');
+    }
+  });
+</script>

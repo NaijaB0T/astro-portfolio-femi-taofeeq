@@ -1,0 +1,364 @@
+---
+interface Props {
+  id: string;
+  name: string;
+  required?: boolean;
+  rows?: number;
+  placeholder?: string;
+  value?: string;
+}
+
+const { id, name, required = false, rows = 8, placeholder = "", value = "" } = Astro.props;
+---
+
+<div class="markdown-editor">
+  <!-- Mode Toggle -->
+  <div class="mode-toggle">
+    <button type="button" class="mode-btn active" data-mode="edit">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+        <path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+      </svg>
+      Edit
+    </button>
+    <button type="button" class="mode-btn" data-mode="preview">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+        <circle cx="12" cy="12" r="3"/>
+      </svg>
+      Preview
+    </button>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="toolbar-section">
+      <button type="button" class="toolbar-btn" data-action="bold" title="Bold">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6V4z"/>
+          <path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6v-8z"/>
+        </svg>
+      </button>
+      
+      <button type="button" class="toolbar-btn" data-action="italic" title="Italic">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="19" y1="4" x2="10" y2="4"/>
+          <line x1="14" y1="20" x2="5" y2="20"/>
+          <line x1="15" y1="4" x2="9" y2="20"/>
+        </svg>
+      </button>      
+      <button type="button" class="toolbar-btn" data-action="code" title="Code">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="16,18 22,12 16,6"/>
+          <polyline points="8,6 2,12 8,18"/>
+        </svg>
+      </button>
+    </div>
+    
+    <div class="toolbar-divider"></div>
+    
+    <div class="toolbar-section">
+      <button type="button" class="toolbar-btn" data-action="h1" title="Heading 1">H1</button>
+      <button type="button" class="toolbar-btn" data-action="h2" title="Heading 2">H2</button>
+      <button type="button" class="toolbar-btn" data-action="h3" title="Heading 3">H3</button>
+    </div>
+    
+    <div class="toolbar-divider"></div>
+    
+    <div class="toolbar-section">
+      <button type="button" class="toolbar-btn" data-action="link" title="Link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+        </svg>
+      </button>
+      
+      <button type="button" class="toolbar-btn" data-action="image" title="Image">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+          <circle cx="9" cy="9" r="2"/>
+          <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+        </svg>
+      </button>
+      
+      <button type="button" class="toolbar-btn" data-action="ul" title="List">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="8" y1="6" x2="21" y2="6"/>
+          <line x1="8" y1="12" x2="21" y2="12"/>
+          <line x1="8" y1="18" x2="21" y2="18"/>
+          <line x1="3" y1="6" x2="3.01" y2="6"/>
+          <line x1="3" y1="12" x2="3.01" y2="12"/>
+          <line x1="3" y1="18" x2="3.01" y2="18"/>
+        </svg>
+      </button>
+      
+      <button type="button" class="toolbar-btn" data-action="quote" title="Quote">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/>
+          <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Editor Container -->
+  <div class="editor-container">
+    <!-- Edit Mode -->
+    <div class="edit-mode">
+      <textarea 
+        {id}
+        {name}
+        {required}
+        {rows}
+        {placeholder}
+        value={value}
+        class="w-full px-3 py-2 border border-input rounded-md bg-background resize-none focus:outline-none focus:ring-2 focus:ring-ring"
+      ></textarea>
+    </div>
+    
+    <!-- Preview Mode -->
+    <div class="preview-mode hidden">
+      <div class="preview-content prose prose-lg max-w-none p-3 border border-input rounded-md bg-background min-h-32">
+        <p class="text-muted-foreground italic">Nothing to preview yet...</p>
+      </div>
+    </div>
+  </div>
+</div>
+<style>
+  .markdown-editor {
+    @apply border border-input rounded-lg bg-background;
+  }
+  
+  .mode-toggle {
+    @apply flex border-b border-input bg-muted/30;
+  }
+  
+  .mode-btn {
+    @apply flex items-center gap-2 px-4 py-2 text-sm font-medium;
+    @apply text-muted-foreground hover:text-foreground;
+    @apply border-b-2 border-transparent;
+    @apply transition-all duration-200;
+  }
+  
+  .mode-btn.active {
+    @apply text-foreground border-primary bg-background;
+  }
+  
+  .toolbar {
+    @apply flex items-center gap-1 p-2 border-b border-input bg-muted/30;
+    @apply flex-wrap;
+  }
+  
+  .toolbar-section {
+    @apply flex items-center gap-1;
+  }
+  
+  .toolbar-divider {
+    @apply w-px h-6 bg-border mx-2;
+  }
+  
+  .toolbar-btn {
+    @apply p-2 rounded hover:bg-muted text-muted-foreground hover:text-foreground;
+    @apply transition-colors duration-200;
+    @apply text-xs font-semibold;
+  }
+  
+  .editor-container {
+    @apply relative;
+  }
+  
+  .edit-mode, .preview-mode {
+    @apply p-0;
+  }
+  
+  .edit-mode textarea {
+    @apply border-0 rounded-none rounded-b-lg;
+    @apply focus:ring-0;
+    font-family: 'JetBrains Mono', 'Monaco', 'Consolas', monospace;
+  }
+  
+  .preview-content {
+    @apply border-0 rounded-none rounded-b-lg;
+    @apply min-h-48;
+  }
+  
+  .preview-content h1 { @apply text-3xl font-bold mt-6 mb-4; }
+  .preview-content h2 { @apply text-2xl font-bold mt-5 mb-3; }
+  .preview-content h3 { @apply text-xl font-bold mt-4 mb-2; }
+  .preview-content p { @apply mb-4; }
+  .preview-content ul { @apply list-disc pl-6 mb-4; }
+  .preview-content ol { @apply list-decimal pl-6 mb-4; }
+  .preview-content blockquote { 
+    @apply border-l-4 border-primary pl-4 italic text-muted-foreground my-4; 
+  }
+  .preview-content code { 
+    @apply bg-muted px-1 py-0.5 rounded text-sm font-mono; 
+  }
+  .preview-content pre { 
+    @apply bg-muted p-4 rounded-lg overflow-x-auto my-4; 
+  }
+  .preview-content a { 
+    @apply text-primary hover:underline; 
+  }
+</style>
+<script>
+  class MarkdownEditor {
+    constructor(container) {
+      this.container = container;
+      this.textarea = container.querySelector('textarea');
+      this.preview = container.querySelector('.preview-content');
+      this.editMode = container.querySelector('.edit-mode');
+      this.previewMode = container.querySelector('.preview-mode');
+      
+      this.init();
+    }
+    
+    init() {
+      // Mode toggle
+      this.container.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.addEventListener('click', () => this.toggleMode(btn.dataset.mode));
+      });
+      
+      // Toolbar buttons
+      this.container.querySelectorAll('.toolbar-btn').forEach(btn => {
+        btn.addEventListener('click', () => this.handleToolbarAction(btn.dataset.action));
+      });
+      
+      // Live preview update
+      this.textarea.addEventListener('input', () => this.updatePreview());
+      
+      // Keyboard shortcuts
+      this.textarea.addEventListener('keydown', (e) => this.handleKeydown(e));
+    }
+    
+    toggleMode(mode) {
+      // Update active button
+      this.container.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.mode === mode);
+      });
+      
+      // Update visibility
+      if (mode === 'preview') {
+        this.editMode.classList.add('hidden');
+        this.previewMode.classList.remove('hidden');
+        this.updatePreview();
+      } else {
+        this.editMode.classList.remove('hidden');
+        this.previewMode.classList.add('hidden');
+      }
+    }
+    
+    updatePreview() {
+      const markdown = this.textarea.value;
+      const html = this.parseMarkdown(markdown);
+      this.preview.innerHTML = html || '<p class="text-muted-foreground italic">Nothing to preview yet...</p>';
+    }
+    
+    parseMarkdown(markdown) {
+      if (!markdown.trim()) return '';
+      
+      let html = markdown
+        // Headers
+        .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+        .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+        .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+        // Bold and Italic
+        .replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        // Code
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        // Links
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+        // Images
+        .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="max-w-full h-auto rounded-lg" />')
+        // Blockquotes
+        .replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>')
+        // Lists
+        .replace(/^[\s]*[-*+] (.*$)/gim, '<li>$1</li>')
+        // Line breaks
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/\n/g, '<br>');
+      
+      // Wrap in paragraphs
+      html = '<p>' + html + '</p>';
+      
+      // Clean up lists
+      html = html.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>');
+      html = html.replace(/<\/ul>\s*<ul>/g, '');
+      
+      return html;
+    }    
+    handleToolbarAction(action) {
+      const start = this.textarea.selectionStart;
+      const end = this.textarea.selectionEnd;
+      const selectedText = this.textarea.value.substring(start, end);
+      let replacement = '';
+      
+      switch (action) {
+        case 'bold':
+          replacement = `**${selectedText || 'bold text'}**`;
+          break;
+        case 'italic':
+          replacement = `*${selectedText || 'italic text'}*`;
+          break;
+        case 'code':
+          replacement = `\`${selectedText || 'code'}\``;
+          break;
+        case 'h1':
+          replacement = `# ${selectedText || 'Heading 1'}`;
+          break;
+        case 'h2':
+          replacement = `## ${selectedText || 'Heading 2'}`;
+          break;
+        case 'h3':
+          replacement = `### ${selectedText || 'Heading 3'}`;
+          break;
+        case 'link':
+          replacement = `[${selectedText || 'link text'}](https://example.com)`;
+          break;
+        case 'image':
+          replacement = `![${selectedText || 'alt text'}](https://example.com/image.jpg)`;
+          break;
+        case 'ul':
+          replacement = `- ${selectedText || 'list item'}`;
+          break;
+        case 'quote':
+          replacement = `> ${selectedText || 'quote'}`;
+          break;
+      }
+      
+      this.insertText(replacement, start, end);
+    }
+    
+    handleKeydown(e) {
+      if (e.ctrlKey || e.metaKey) {
+        switch (e.key) {
+          case 'b':
+            e.preventDefault();
+            this.handleToolbarAction('bold');
+            break;
+          case 'i':
+            e.preventDefault();
+            this.handleToolbarAction('italic');
+            break;
+        }
+      }
+    }
+    
+    insertText(text, start, end) {
+      const value = this.textarea.value;
+      this.textarea.value = value.substring(0, start) + text + value.substring(end);
+      this.textarea.focus();
+      this.textarea.setSelectionRange(start + text.length, start + text.length);
+      this.updatePreview();
+    }
+  }
+  
+  // Initialize all markdown editors
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.markdown-editor').forEach(editor => {
+      new MarkdownEditor(editor);
+    });
+  });
+</script>

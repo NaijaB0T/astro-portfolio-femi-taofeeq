@@ -1,0 +1,192 @@
+---
+export const prerender = false;
+
+import Layout from '../../layouts/Layout.astro';
+import MarkdownEditor from '../../components/MarkdownEditor.astro';
+import '../../styles/globals.css';
+---
+
+<Layout title="Manage About - Admin">
+  <div class="container mx-auto px-4 py-12">
+    <div class="max-w-4xl mx-auto">
+      <div class="flex items-center justify-between mb-8">
+        <h1 class="text-4xl font-bold">Manage About Page</h1>
+        <a href="/admin" class="text-primary hover:underline">← Back to Admin</a>
+      </div>
+      
+      <div class="bg-card border rounded-lg p-6">
+        <form id="about-form" class="space-y-6">
+          <div>
+            <label for="title" class="block text-sm font-medium mb-2">Page Title</label>
+            <input type="text" id="title" name="title" required 
+                   class="w-full px-3 py-2 border border-input rounded-md bg-background" />
+          </div>
+          
+          <div>
+            <label for="content" class="block text-sm font-medium mb-2">Content (Markdown & HTML supported)</label>
+            <MarkdownEditor 
+              id="content" 
+              name="content" 
+              required={true}
+              rows={15}
+              placeholder="Write about yourself, your background, experience..."
+            />
+          </div>
+          
+          <div>
+            <label for="imageUrl" class="block text-sm font-medium mb-2">Profile Image</label>
+            <div class="space-y-2">
+              <input type="file" id="imageFile" name="imageFile" accept="image/*"
+                     class="w-full px-3 py-2 border border-input rounded-md bg-background file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary file:text-primary-foreground hover:file:bg-primary/90" />
+              <div class="text-xs text-muted-foreground">
+                Or use URL: 
+                <input type="url" id="imageUrl" name="imageUrl" placeholder="https://example.com/image.jpg"
+                       class="ml-2 px-2 py-1 border border-input rounded text-xs bg-background" />
+              </div>
+              <!-- Image Preview -->
+              <div id="image-preview" class="hidden">
+                <img class="w-48 h-36 object-cover rounded-lg border" alt="Preview" />
+                <p class="text-xs text-muted-foreground mt-1">Preview</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Image History -->
+          <div id="image-history" class="hidden">
+            <label class="block text-sm font-medium mb-2">Previous Images</label>
+            <div class="grid grid-cols-6 gap-2" id="history-grid">
+              <!-- Images will be loaded here -->
+            </div>
+            <p class="text-xs text-muted-foreground mt-1">Click any previous image to use it again</p>
+          </div>
+          
+          <button type="submit" 
+                  class="w-full bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md font-medium">
+            Update About Page
+          </button>
+        </form>
+        
+        <div id="about-message" class="mt-4 hidden"></div>
+      </div>
+    </div>
+  </div>
+</Layout>
+<script>
+  // Load current about data
+  async function loadAboutData() {
+    try {
+      const response = await fetch('/api/about');
+      const about = await response.json();
+      
+      document.getElementById('title').value = about.title || '';
+      document.getElementById('content').value = about.content || '';
+      document.getElementById('imageUrl').value = about.imageUrl || '';
+      
+      // Show image preview if URL exists
+      if (about.imageUrl) {
+        showImagePreview(about.imageUrl);
+      }
+      
+      // Show image history
+      if (about.imageHistory && about.imageHistory.length > 0) {
+        showImageHistory(about.imageHistory);
+      }
+    } catch (error) {
+      console.error('Error loading about data:', error);
+    }
+  }
+  
+  function showImagePreview(url) {
+    const preview = document.getElementById('image-preview');
+    const img = preview.querySelector('img');
+    img.src = url;
+    preview.classList.remove('hidden');
+  }
+  
+  function showImageHistory(history) {
+    const historySection = document.getElementById('image-history');
+    const grid = document.getElementById('history-grid');
+    
+    grid.innerHTML = history.map(url => `
+      <div class="cursor-pointer hover:opacity-80 transition-opacity" onclick="selectHistoryImage('${url}')">
+        <img src="${url}" alt="Previous image" class="w-full aspect-square object-cover rounded border" />
+      </div>
+    `).join('');
+    
+    historySection.classList.remove('hidden');
+  }
+  
+  window.selectHistoryImage = function(url) {
+    document.getElementById('imageUrl').value = url;
+    showImagePreview(url);
+  };
+  
+  // Image preview functionality
+  document.getElementById('imageFile').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      // Clear the imageUrl field when a file is selected
+      document.getElementById('imageUrl').value = ''; 
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        showImagePreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+  
+  // URL preview functionality
+  document.getElementById('imageUrl').addEventListener('input', function(e) {
+    const url = e.target.value;
+    if (url && url.startsWith('http')) {
+      showImagePreview(url);
+    }
+  });
+  
+  // Form submission
+  document.getElementById('about-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    
+    submitBtn.textContent = 'Updating...';
+    submitBtn.disabled = true;
+    
+    try {
+      const response = await fetch('/api/about', {
+        method: 'PUT',
+        body: formData,
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok) {
+        document.getElementById('about-message').innerHTML = 
+          '<p class="text-green-600">About page updated successfully!</p>';
+        document.getElementById('about-message').classList.remove('hidden');
+        
+        // Reload to show updated image history
+        setTimeout(loadAboutData, 1000);
+      } else {
+        throw new Error(result.error || 'Failed to update about page');
+      }
+    } catch (error) {
+      document.getElementById('about-message').innerHTML = 
+        `<p class="text-red-600">Error: ${error.message}</p>`;
+      document.getElementById('about-message').classList.remove('hidden');
+    } finally {
+      submitBtn.textContent = originalText;
+      submitBtn.disabled = false;
+    }
+    
+    // Hide message after 3 seconds
+    setTimeout(() => {
+      document.getElementById('about-message').classList.add('hidden');
+    }, 3000);
+  });
+  
+  // Load data on page load
+  loadAboutData();
+</script>
