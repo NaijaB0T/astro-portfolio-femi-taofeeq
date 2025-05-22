@@ -96,7 +96,7 @@ export async function uploadImageToR2(
 }
 
 export function validateImageFile(file: File): { valid: boolean; error?: string } {
-  const maxSize = 5 * 1024 * 1024; // 5MB
+  const maxSize = 20 * 1024 * 1024; // 20MB
   const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
   
   if (!file || file.size === 0) {
@@ -104,7 +104,7 @@ export function validateImageFile(file: File): { valid: boolean; error?: string 
   }
   
   if (file.size > maxSize) {
-    return { valid: false, error: 'File size must be less than 5MB' };
+    return { valid: false, error: 'File size must be less than 20MB' };
   }
   
   if (!allowedTypes.includes(file.type)) {
