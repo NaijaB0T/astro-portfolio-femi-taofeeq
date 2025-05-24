@@ -1,5 +1,5 @@
 ---
-export const prerender = false;
+export const prerender = true;
 
 import Layout from '../layouts/Layout.astro';
 import Card from '../components/ui/Card.astro';
@@ -9,46 +9,15 @@ import CardDescription from '../components/ui/CardDescription.astro';
 import CardContent from '../components/ui/CardContent.astro';
 import '../styles/globals.css';
 
-// GitHub username extracted from the provided URL
 const GITHUB_USERNAME = 'NaijaB0T';
-
-// Fetch repositories from GitHub API
-let repositories = [];
-let githubUser = null;
-let error = null;
-
-try {
-  // Fetch user profile
-  const userResponse = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}`);
-  if (userResponse.ok) {
-    githubUser = await userResponse.json();
-  }
-
-  // Fetch repositories
-  const reposResponse = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=100&sort=updated`);
-  if (reposResponse.ok) {
-    const allRepos = await reposResponse.json();
-    repositories = allRepos
-      .filter(repo => !repo.fork) // Filter out forked repositories
-      .sort((a, b) => b.stargazers_count - a.stargazers_count) // Sort by stars descending
-      .slice(0, 12); // Limit to top 12 repositories
-  }
-} catch (err) {
-  error = err.message;
-  console.error('Error fetching GitHub data:', err);
-}
-
-// Programming language colors
 const languageColors = {
   JavaScript: '#f1e05a', TypeScript: '#2b7489', Python: '#3572a5',
-  Java: '#b07219', 'C++': '#f34b7d', C: '#555555', 'C#': '#239120',
-  PHP: '#4f5d95', Ruby: '#701516', Go: '#00add8', Rust: '#dea584',
-  Swift: '#ffac45', HTML: '#e34c26', CSS: '#1572b6', Vue: '#4fc08d'
+  Java: '#b07219', 'C++': '#f34b7d', C: '#555555', 'C#': '#239120'
 };
 ---
 
 <Layout title="Developer Showcase - NaijaB0T" description="Full-stack developer profile and repository showcase">
-  <div class="min-h-screen bg-gradient-to-br from-slate-900 via-red-900 to-slate-900">
+  <div class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
     <!-- Code Matrix Background Effect -->
     <div class="fixed inset-0 overflow-hidden opacity-10">
       <div class="matrix-rain"></div>
@@ -68,36 +37,27 @@ const languageColors = {
                 <span class="ml-4 text-cyan-400 font-mono text-sm">developer_profile.sh</span>
               </div>
               
-              {githubUser && (
+              <!-- User Profile Container -->
+              <div id="user-profile" class="hidden">
                 <div class="flex items-center justify-center gap-6 mb-6">
-                  <img 
-                    src={githubUser.avatar_url} 
-                    alt={githubUser.name || githubUser.login}
-                    class="w-24 h-24 rounded-full border-4 border-cyan-400/50 shadow-lg"
-                  />
+                  <img id="user-avatar" src="" alt="" class="w-24 h-24 rounded-full border-4 border-cyan-400/50 shadow-lg" />
                   <div class="text-left">
-                    <h1 class="text-3xl font-bold text-white mb-2">
-                      {githubUser.name || githubUser.login}
-                    </h1>
-                    <p class="text-cyan-400 font-mono">@{githubUser.login}</p>
-                    {githubUser.bio && (
-                      <p class="text-gray-300 mt-2 max-w-md">{githubUser.bio}</p>
-                    )}
+                    <h1 id="user-name" class="text-3xl font-bold text-white mb-2"></h1>
+                    <p id="user-login" class="text-cyan-400 font-mono"></p>
+                    <p id="user-bio" class="text-gray-300 mt-2 max-w-md"></p>
                   </div>
                 </div>
-              )}
+              </div>
               
               <!-- Stats Terminal -->
-              <div class="bg-black/50 rounded-lg p-4 font-mono text-sm">
+              <div id="stats-terminal" class="bg-black/50 rounded-lg p-4 font-mono text-sm hidden">
                 <div class="text-green-400 mb-2">$ cat developer_stats.json</div>
-                {githubUser && (
-                  <div class="text-gray-300 space-y-1">
-                    <div><span class="text-cyan-400">"public_repos":</span> <span class="text-yellow-400">{githubUser.public_repos}</span>,</div>
-                    <div><span class="text-cyan-400">"followers":</span> <span class="text-yellow-400">{githubUser.followers}</span>,</div>
-                    <div><span class="text-cyan-400">"following":</span> <span class="text-yellow-400">{githubUser.following}</span>,</div>
-                    <div><span class="text-cyan-400">"location":</span> <span class="text-green-400">"{githubUser.location || 'Remote'}"</span></div>
-                  </div>
-                )}
+                <div class="text-gray-300 space-y-1">
+                  <div><span class="text-cyan-400">"public_repos":</span> <span id="user-repos" class="text-yellow-400"></span>,</div>
+                  <div><span class="text-cyan-400">"followers":</span> <span id="user-followers" class="text-yellow-400"></span>,</div>
+                  <div><span class="text-cyan-400">"following":</span> <span id="user-following" class="text-yellow-400"></span>,</div>
+                  <div><span class="text-cyan-400">"location":</span> <span id="user-location" class="text-green-400"></span></div>
+                </div>
               </div>
             </div>
             
@@ -127,120 +87,40 @@ const languageColors = {
             </div>
           </div>
 
-          {error ? (
-            <div class="text-center">
-              <div class="bg-red-500/20 border border-red-500/50 rounded-xl p-8 max-w-md mx-auto">
-                <p class="text-red-400">Error loading repositories: {error}</p>
-              </div>
+          <!-- Error State -->
+          <div id="error-state" class="text-center hidden">
+            <div class="bg-red-500/20 border border-red-500/50 rounded-xl p-8 max-w-md mx-auto">
+              <p class="text-red-400">Error loading repositories. Please try again later.</p>
             </div>
-          ) : repositories.length === 0 ? (
-            <div class="text-center">
-              <div class="bg-yellow-500/20 border border-yellow-500/50 rounded-xl p-8 max-w-md mx-auto">
-                <p class="text-yellow-400">Loading repositories...</p>
-              </div>
+          </div>
+
+          <!-- Loading State -->
+          <div id="loading-state" class="text-center">
+            <div class="bg-yellow-500/20 border border-yellow-500/50 rounded-xl p-8 max-w-md mx-auto">
+              <p class="text-yellow-400">Loading repositories...</p>
             </div>
-          ) : (
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {repositories.map((repo) => (
-                <div class="group relative">
-                  <!-- Glow effect -->
-                  <div class="absolute -inset-1 bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 rounded-xl opacity-0 group-hover:opacity-30 transition-opacity duration-300 blur"></div>
-                  
-                  <Card class="relative bg-slate-800/80 backdrop-blur-sm border-slate-700/50 hover:border-cyan-400/50 transition-all duration-300 h-full">
-                    <CardHeader class="pb-3">
-                      <div class="flex items-start justify-between">
-                        <div class="flex-1">
-                          <CardTitle class="text-white hover:text-cyan-400 transition-colors">
-                            <a href={repo.html_url} target="_blank" rel="noopener noreferrer" class="flex items-center gap-2">
-                              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                              </svg>
-                              {repo.name}
-                            </a>
-                          </CardTitle>
-                          
-                          <CardDescription class="text-gray-400 mt-2 line-clamp-2">
-                            {repo.description || 'No description available'}
-                          </CardDescription>
-                        </div>
-                        
-                        <!-- Star count -->
-                        {repo.stargazers_count > 0 && (
-                          <div class="flex items-center gap-1 text-yellow-400 text-sm font-medium">
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                            </svg>
-                            {repo.stargazers_count}
-                          </div>
-                        )}
-                      </div>
-                    </CardHeader>
-                    
-                    <CardContent class="pt-0">
-                      <!-- Language and stats -->
-                      <div class="flex items-center justify-between text-sm">
-                        <div class="flex items-center gap-4">
-                          {repo.language && (
-                            <div class="flex items-center gap-2">
-                              <div 
-                                class="w-3 h-3 rounded-full"
-                                style={`background-color: ${languageColors[repo.language] || '#6b7280'}`}
-                              ></div>
-                              <span class="text-gray-300">{repo.language}</span>
-                            </div>
-                          )}
-                          
-                          {repo.size > 0 && (
-                            <span class="text-gray-500">
-                              {(repo.size / 1024).toFixed(1)}MB
-                            </span>
-                          )}
-                        </div>
-                        
-                        <!-- Updated date -->
-                        <span class="text-gray-500 text-xs">
-                          {new Date(repo.updated_at).toLocaleDateString()}
-                        </span>
-                      </div>
-                      
-                      <!-- Topics/Tags -->
-                      {repo.topics && repo.topics.length > 0 && (
-                        <div class="flex flex-wrap gap-1 mt-3">
-                          {repo.topics.slice(0, 3).map((topic) => (
-                            <span class="bg-cyan-400/20 text-cyan-400 text-xs px-2 py-1 rounded-full border border-cyan-400/30">
-                              {topic}
-                            </span>
-                          ))}
-                          {repo.topics.length > 3 && (
-                            <span class="text-gray-500 text-xs px-2 py-1">
-                              +{repo.topics.length - 3} more
-                            </span>
-                          )}
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </div>
-              ))}
-            </div>
-          )}
+          </div>
+
+          <!-- Repository Grid Container -->
+          <div id="repos-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
+            <!-- Repositories will be populated by JavaScript -->
+          </div>
 
           <!-- View All Button -->
-          {githubUser && (
-            <div class="text-center mt-12">
-              <a 
-                href={`https://github.com/${GITHUB_USERNAME}?tab=repositories`}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="inline-flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600 text-white font-medium px-8 py-3 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
-              >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                </svg>
-                View All Repositories
-              </a>
-            </div>
-          )}
+          <div id="view-all-btn" class="text-center mt-12 hidden">
+            <a 
+              id="view-all-link"
+              href="#"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600 text-white font-medium px-8 py-3 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+              </svg>
+              View All Repositories
+            </a>
+          </div>
         </div>
       </section>
     </div>
@@ -338,15 +218,192 @@ const languageColors = {
   }
 </style>
 
-<script>
-  // Add some interactive effects
-  document.addEventListener('DOMContentLoaded', () => {
-    // Add hover sound effect (optional - can be removed if not needed)
-    const cards = document.querySelectorAll('.group');
+<script define:vars={{ GITHUB_USERNAME, languageColors }}>
+  // GitHub API client-side integration
+  const API_BASE = 'https://api.github.com';
+  
+  // DOM elements
+  const userProfile = document.getElementById('user-profile');
+  const userAvatar = document.getElementById('user-avatar');
+  const userName = document.getElementById('user-name');
+  const userLogin = document.getElementById('user-login');
+  const userBio = document.getElementById('user-bio');
+  const statsTerminal = document.getElementById('stats-terminal');
+  const userRepos = document.getElementById('user-repos');
+  const userFollowers = document.getElementById('user-followers');
+  const userFollowing = document.getElementById('user-following');
+  const userLocation = document.getElementById('user-location');
+  const errorState = document.getElementById('error-state');
+  const loadingState = document.getElementById('loading-state');
+  const reposGrid = document.getElementById('repos-grid');
+  const viewAllBtn = document.getElementById('view-all-btn');
+  const viewAllLink = document.getElementById('view-all-link');
+  
+  // Fetch GitHub user data
+  async function fetchGitHubUser() {
+    try {
+      const response = await fetch(`${API_BASE}/users/${GITHUB_USERNAME}`);
+      if (!response.ok) throw new Error('User not found');
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      throw error;
+    }
+  }
+  
+  // Fetch GitHub repositories
+  async function fetchGitHubRepos() {
+    try {
+      const response = await fetch(`${API_BASE}/users/${GITHUB_USERNAME}/repos?per_page=100&sort=updated`);
+      if (!response.ok) throw new Error('Repositories not found');
+      const allRepos = await response.json();
+      
+      return allRepos
+        .filter(repo => !repo.fork) // Filter out forked repositories
+        .sort((a, b) => b.stargazers_count - a.stargazers_count) // Sort by stars
+        .slice(0, 12); // Limit to top 12
+    } catch (error) {
+      console.error('Error fetching repos:', error);
+      throw error;
+    }
+  }
+  
+  // Display user profile
+  function displayUserProfile(user) {
+    userAvatar.src = user.avatar_url;
+    userAvatar.alt = user.name || user.login;
+    userName.textContent = user.name || user.login;
+    userLogin.textContent = `@${user.login}`;
     
-    cards.forEach(card => {
+    if (user.bio) {
+      userBio.textContent = user.bio;
+      userBio.style.display = 'block';
+    } else {
+      userBio.style.display = 'none';
+    }
+    
+    userRepos.textContent = user.public_repos;
+    userFollowers.textContent = user.followers;
+    userFollowing.textContent = user.following;
+    userLocation.textContent = `"${user.location || 'Remote'}"`;
+    
+    userProfile.classList.remove('hidden');
+    statsTerminal.classList.remove('hidden');
+    
+    // Set up view all repositories link
+    viewAllLink.href = `https://github.com/${GITHUB_USERNAME}?tab=repositories`;
+  }
+  
+  // Create repository card HTML
+  function createRepoCard(repo) {
+    const languageColor = languageColors[repo.language] || '#6b7280';
+    const updatedDate = new Date(repo.updated_at).toLocaleDateString();
+    
+    let topicsHTML = '';
+    if (repo.topics && repo.topics.length > 0) {
+      const displayTopics = repo.topics.slice(0, 3);
+      const moreCount = repo.topics.length - 3;
+      
+      topicsHTML = `
+        <div class="flex flex-wrap gap-1 mt-3">
+          ${displayTopics.map(topic => 
+            `<span class="bg-cyan-400/20 text-cyan-400 text-xs px-2 py-1 rounded-full border border-cyan-400/30">${topic}</span>`
+          ).join('')}
+          ${moreCount > 0 ? `<span class="text-gray-500 text-xs px-2 py-1">+${moreCount} more</span>` : ''}
+        </div>
+      `;
+    }
+    
+    let starsHTML = '';
+    if (repo.stargazers_count > 0) {
+      starsHTML = `
+        <div class="flex items-center gap-1 text-yellow-400 text-sm font-medium">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+          ${repo.stargazers_count}
+        </div>
+      `;
+    }
+    
+    return `
+      <div class="group relative">
+        <!-- Glow effect -->
+        <div class="absolute -inset-1 bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 rounded-xl opacity-0 group-hover:opacity-30 transition-opacity duration-300 blur"></div>
+        
+        <div class="relative bg-slate-800/80 backdrop-blur-sm border-slate-700/50 hover:border-cyan-400/50 transition-all duration-300 h-full rounded-lg border shadow-sm">
+          <div class="p-6 pb-3">
+            <div class="flex items-start justify-between">
+              <div class="flex-1">
+                <h3 class="text-white hover:text-cyan-400 transition-colors text-lg font-semibold leading-none tracking-tight">
+                  <a href="${repo.html_url}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                    ${repo.name}
+                  </a>
+                </h3>
+                
+                <p class="text-gray-400 mt-2 line-clamp-2 text-sm text-muted-foreground">
+                  ${repo.description || 'No description available'}
+                </p>
+              </div>
+              ${starsHTML}
+            </div>
+          </div>
+          
+          <div class="p-6 pt-0">
+            <!-- Language and stats -->
+            <div class="flex items-center justify-between text-sm">
+              <div class="flex items-center gap-4">
+                ${repo.language ? `
+                  <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full" style="background-color: ${languageColor}"></div>
+                    <span class="text-gray-300">${repo.language}</span>
+                  </div>
+                ` : ''}
+                
+                ${repo.size > 0 ? `
+                  <span class="text-gray-500">
+                    ${(repo.size / 1024).toFixed(1)}MB
+                  </span>
+                ` : ''}
+              </div>
+              
+              <!-- Updated date -->
+              <span class="text-gray-500 text-xs">
+                ${updatedDate}
+              </span>
+            </div>
+            
+            ${topicsHTML}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  
+  // Display repositories
+  function displayRepositories(repositories) {
+    reposGrid.innerHTML = repositories.map(repo => createRepoCard(repo)).join('');
+    reposGrid.classList.remove('hidden');
+    viewAllBtn.classList.remove('hidden');
+    
+    // Add interactive effects
+    const cards = reposGrid.querySelectorAll('.group');
+    cards.forEach((card, index) => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(20px)';
+      card.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+      
+      // Trigger animation
+      setTimeout(() => {
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+      }, index * 100);
+      
+      // Hover effects
       card.addEventListener('mouseenter', () => {
-        // Add a subtle transform effect
         card.style.transform = 'translateY(-2px)';
       });
       
@@ -354,28 +411,34 @@ const languageColors = {
         card.style.transform = 'translateY(0)';
       });
     });
-    
-    // Add smooth reveal animation for cards
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px'
-    };
-    
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.style.opacity = '1';
-          entry.target.style.transform = 'translateY(0)';
-        }
-      });
-    }, observerOptions);
-    
-    // Initially hide cards and observe them
-    cards.forEach((card, index) => {
-      card.style.opacity = '0';
-      card.style.transform = 'translateY(20px)';
-      card.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
-      observer.observe(card);
-    });
-  });
+  }
+  
+  // Show error state
+  function showError() {
+    loadingState.classList.add('hidden');
+    errorState.classList.remove('hidden');
+  }
+  
+  // Initialize the page
+  async function initializePage() {
+    try {
+      // Fetch user data
+      const user = await fetchGitHubUser();
+      displayUserProfile(user);
+      
+      // Fetch repositories
+      const repositories = await fetchGitHubRepos();
+      displayRepositories(repositories);
+      
+      // Hide loading state
+      loadingState.classList.add('hidden');
+      
+    } catch (error) {
+      console.error('Failed to load GitHub data:', error);
+      showError();
+    }
+  }
+  
+  // Start initialization when page loads
+  document.addEventListener('DOMContentLoaded', initializePage);
 </script>
