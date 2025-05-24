@@ -1,0 +1,381 @@
+---
+export const prerender = false;
+
+import Layout from '../layouts/Layout.astro';
+import Card from '../components/ui/Card.astro';
+import CardHeader from '../components/ui/CardHeader.astro';
+import CardTitle from '../components/ui/CardTitle.astro';
+import CardDescription from '../components/ui/CardDescription.astro';
+import CardContent from '../components/ui/CardContent.astro';
+import '../styles/globals.css';
+
+// GitHub username extracted from the provided URL
+const GITHUB_USERNAME = 'NaijaB0T';
+
+// Fetch repositories from GitHub API
+let repositories = [];
+let githubUser = null;
+let error = null;
+
+try {
+  // Fetch user profile
+  const userResponse = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}`);
+  if (userResponse.ok) {
+    githubUser = await userResponse.json();
+  }
+
+  // Fetch repositories
+  const reposResponse = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=100&sort=updated`);
+  if (reposResponse.ok) {
+    const allRepos = await reposResponse.json();
+    repositories = allRepos
+      .filter(repo => !repo.fork) // Filter out forked repositories
+      .sort((a, b) => b.stargazers_count - a.stargazers_count) // Sort by stars descending
+      .slice(0, 12); // Limit to top 12 repositories
+  }
+} catch (err) {
+  error = err.message;
+  console.error('Error fetching GitHub data:', err);
+}
+
+// Programming language colors
+const languageColors = {
+  JavaScript: '#f1e05a', TypeScript: '#2b7489', Python: '#3572a5',
+  Java: '#b07219', 'C++': '#f34b7d', C: '#555555', 'C#': '#239120',
+  PHP: '#4f5d95', Ruby: '#701516', Go: '#00add8', Rust: '#dea584',
+  Swift: '#ffac45', HTML: '#e34c26', CSS: '#1572b6', Vue: '#4fc08d'
+};
+---
+
+<Layout title="Developer Showcase - NaijaB0T" description="Full-stack developer profile and repository showcase">
+  <div class="min-h-screen bg-gradient-to-br from-slate-900 via-red-900 to-slate-900">
+    <!-- Code Matrix Background Effect -->
+    <div class="fixed inset-0 overflow-hidden opacity-10">
+      <div class="matrix-rain"></div>
+    </div>
+    
+    <div class="relative z-10">
+      <!-- Hero Section -->
+      <section class="pt-20 pb-16 px-4">
+        <div class="container mx-auto max-w-6xl">
+          <div class="text-center mb-16">
+            <!-- Terminal-like Header -->
+            <div class="inline-block bg-slate-800/80 backdrop-blur-sm rounded-xl p-6 border border-cyan-400/30 shadow-2xl mb-8">
+              <div class="flex items-center gap-2 mb-4">
+                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                <span class="ml-4 text-cyan-400 font-mono text-sm">developer_profile.sh</span>
+              </div>
+              
+              {githubUser && (
+                <div class="flex items-center justify-center gap-6 mb-6">
+                  <img 
+                    src={githubUser.avatar_url} 
+                    alt={githubUser.name || githubUser.login}
+                    class="w-24 h-24 rounded-full border-4 border-cyan-400/50 shadow-lg"
+                  />
+                  <div class="text-left">
+                    <h1 class="text-3xl font-bold text-white mb-2">
+                      {githubUser.name || githubUser.login}
+                    </h1>
+                    <p class="text-cyan-400 font-mono">@{githubUser.login}</p>
+                    {githubUser.bio && (
+                      <p class="text-gray-300 mt-2 max-w-md">{githubUser.bio}</p>
+                    )}
+                  </div>
+                </div>
+              )}
+              
+              <!-- Stats Terminal -->
+              <div class="bg-black/50 rounded-lg p-4 font-mono text-sm">
+                <div class="text-green-400 mb-2">$ cat developer_stats.json</div>
+                {githubUser && (
+                  <div class="text-gray-300 space-y-1">
+                    <div><span class="text-cyan-400">"public_repos":</span> <span class="text-yellow-400">{githubUser.public_repos}</span>,</div>
+                    <div><span class="text-cyan-400">"followers":</span> <span class="text-yellow-400">{githubUser.followers}</span>,</div>
+                    <div><span class="text-cyan-400">"following":</span> <span class="text-yellow-400">{githubUser.following}</span>,</div>
+                    <div><span class="text-cyan-400">"location":</span> <span class="text-green-400">"{githubUser.location || 'Remote'}"</span></div>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <!-- Typing Animation -->
+            <div class="text-2xl md:text-4xl font-bold text-white mb-4">
+              <span class="typing-text"></span>
+              <span class="cursor"></span>
+            </div>
+            
+            <p class="text-gray-300 text-lg max-w-2xl mx-auto">
+              Exploring code repositories and building amazing projects
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Repository Grid -->
+      <section class="pb-20 px-4">
+        <div class="container mx-auto max-w-7xl">
+          <!-- Section Header -->
+          <div class="text-center mb-12">
+            <div class="inline-flex items-center gap-3 bg-slate-800/80 backdrop-blur-sm rounded-full px-6 py-3 border border-cyan-400/30">
+              <svg class="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+              </svg>
+              <h2 class="text-xl font-bold text-white">Featured Repositories</h2>
+            </div>
+          </div>
+
+          {error ? (
+            <div class="text-center">
+              <div class="bg-red-500/20 border border-red-500/50 rounded-xl p-8 max-w-md mx-auto">
+                <p class="text-red-400">Error loading repositories: {error}</p>
+              </div>
+            </div>
+          ) : repositories.length === 0 ? (
+            <div class="text-center">
+              <div class="bg-yellow-500/20 border border-yellow-500/50 rounded-xl p-8 max-w-md mx-auto">
+                <p class="text-yellow-400">Loading repositories...</p>
+              </div>
+            </div>
+          ) : (
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {repositories.map((repo) => (
+                <div class="group relative">
+                  <!-- Glow effect -->
+                  <div class="absolute -inset-1 bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 rounded-xl opacity-0 group-hover:opacity-30 transition-opacity duration-300 blur"></div>
+                  
+                  <Card class="relative bg-slate-800/80 backdrop-blur-sm border-slate-700/50 hover:border-cyan-400/50 transition-all duration-300 h-full">
+                    <CardHeader class="pb-3">
+                      <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                          <CardTitle class="text-white hover:text-cyan-400 transition-colors">
+                            <a href={repo.html_url} target="_blank" rel="noopener noreferrer" class="flex items-center gap-2">
+                              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                              </svg>
+                              {repo.name}
+                            </a>
+                          </CardTitle>
+                          
+                          <CardDescription class="text-gray-400 mt-2 line-clamp-2">
+                            {repo.description || 'No description available'}
+                          </CardDescription>
+                        </div>
+                        
+                        <!-- Star count -->
+                        {repo.stargazers_count > 0 && (
+                          <div class="flex items-center gap-1 text-yellow-400 text-sm font-medium">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                            {repo.stargazers_count}
+                          </div>
+                        )}
+                      </div>
+                    </CardHeader>
+                    
+                    <CardContent class="pt-0">
+                      <!-- Language and stats -->
+                      <div class="flex items-center justify-between text-sm">
+                        <div class="flex items-center gap-4">
+                          {repo.language && (
+                            <div class="flex items-center gap-2">
+                              <div 
+                                class="w-3 h-3 rounded-full"
+                                style={`background-color: ${languageColors[repo.language] || '#6b7280'}`}
+                              ></div>
+                              <span class="text-gray-300">{repo.language}</span>
+                            </div>
+                          )}
+                          
+                          {repo.size > 0 && (
+                            <span class="text-gray-500">
+                              {(repo.size / 1024).toFixed(1)}MB
+                            </span>
+                          )}
+                        </div>
+                        
+                        <!-- Updated date -->
+                        <span class="text-gray-500 text-xs">
+                          {new Date(repo.updated_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                      
+                      <!-- Topics/Tags -->
+                      {repo.topics && repo.topics.length > 0 && (
+                        <div class="flex flex-wrap gap-1 mt-3">
+                          {repo.topics.slice(0, 3).map((topic) => (
+                            <span class="bg-cyan-400/20 text-cyan-400 text-xs px-2 py-1 rounded-full border border-cyan-400/30">
+                              {topic}
+                            </span>
+                          ))}
+                          {repo.topics.length > 3 && (
+                            <span class="text-gray-500 text-xs px-2 py-1">
+                              +{repo.topics.length - 3} more
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <!-- View All Button -->
+          {githubUser && (
+            <div class="text-center mt-12">
+              <a 
+                href={`https://github.com/${GITHUB_USERNAME}?tab=repositories`}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600 text-white font-medium px-8 py-3 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                </svg>
+                View All Repositories
+              </a>
+            </div>
+          )}
+        </div>
+      </section>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  /* Matrix Rain Effect */
+  .matrix-rain {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(0, 255, 155, 0.1) 50%,
+      transparent 100%
+    );
+    animation: matrix-fall 20s linear infinite;
+  }
+
+  .matrix-rain::before {
+    content: "01001001 01101110 01110100 01100101 01110010 01101110 01100101 01110100 00100000 01101111 01100110 00100000 01010100 01101000 01101001 01101110 01100111 01110011";
+    position: absolute;
+    top: -100%;
+    left: 0;
+    width: 100%;
+    height: 200%;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: rgba(0, 255, 155, 0.3);
+    white-space: pre-wrap;
+    line-height: 1.2;
+    animation: matrix-scroll 15s linear infinite;
+  }
+
+  @keyframes matrix-fall {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+  }
+
+  @keyframes matrix-scroll {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+  }
+
+  /* Typing Animation */
+  .typing-text::before {
+    content: '';
+    animation: typing 4s steps(40) infinite;
+  }
+
+  @keyframes typing {
+    0%, 20% { content: ''; }
+    21%, 40% { content: 'Welcome to my'; }
+    41%, 60% { content: 'Welcome to my code'; }
+    61%, 80% { content: 'Welcome to my code universe'; }
+    81%, 100% { content: 'Welcome to my code universe 🚀'; }
+  }
+
+  .cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1.2em;
+    background-color: #00ffff;
+    animation: blink 1s infinite;
+  }
+
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+
+  /* Line clamp utility */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Glow effects */
+  .group:hover .absolute {
+    animation: glow-pulse 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes glow-pulse {
+    from { opacity: 0.2; }
+    to { opacity: 0.4; }
+  }
+
+  /* Smooth scroll */
+  html {
+    scroll-behavior: smooth;
+  }
+</style>
+
+<script>
+  // Add some interactive effects
+  document.addEventListener('DOMContentLoaded', () => {
+    // Add hover sound effect (optional - can be removed if not needed)
+    const cards = document.querySelectorAll('.group');
+    
+    cards.forEach(card => {
+      card.addEventListener('mouseenter', () => {
+        // Add a subtle transform effect
+        card.style.transform = 'translateY(-2px)';
+      });
+      
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = 'translateY(0)';
+      });
+    });
+    
+    // Add smooth reveal animation for cards
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, observerOptions);
+    
+    // Initially hide cards and observe them
+    cards.forEach((card, index) => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(20px)';
+      card.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+      observer.observe(card);
+    });
+  });
+</script>
