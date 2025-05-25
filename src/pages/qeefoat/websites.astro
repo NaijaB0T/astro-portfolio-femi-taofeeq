@@ -1,0 +1,350 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Card from '../../components/ui/Card.astro';
+import CardHeader from '../../components/ui/CardHeader.astro';
+import CardTitle from '../../components/ui/CardTitle.astro';
+import CardContent from '../../components/ui/CardContent.astro';
+import Button from '../../components/ui/Button.astro';
+import '../../styles/globals.css';
+---
+
+<Layout title="Website Management - Admin" description="Admin panel for managing client websites">
+  <div class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div class="container mx-auto py-8 px-4">
+      <!-- Header -->
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-white mb-2">Website Management</h1>
+        <p class="text-gray-400">Manage client websites and generate testimonial links</p>
+      </div>
+
+      <!-- Add Website Form -->
+      <Card class="mb-8 bg-slate-800/80 backdrop-blur-sm border-slate-700">
+        <CardHeader>
+          <CardTitle class="text-white">Add New Website</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form id="add-website-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2">Website Name</label>
+              <input type="text" id="website-name" name="name" required 
+                class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white 
+                       focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2">Website URL</label>
+              <input type="url" id="website-url" name="url" required 
+                class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white 
+                       focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2">Client Name</label>
+              <input type="text" id="client-name" name="client" required 
+                class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white 
+                       focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2">Thumbnail Image</label>
+              <div class="space-y-2">
+                <input type="file" id="thumbnail-file" name="thumbnailFile" accept="image/*"
+                  class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white 
+                         focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent">
+                <p class="text-sm text-gray-400">Or provide a URL below:</p>
+                <input type="url" id="thumbnail-url" name="thumbnailUrl" placeholder="https://example.com/image.jpg"
+                  class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white 
+                         focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent">
+              </div>
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-gray-300 mb-2">Description</label>
+              <textarea id="website-description" name="description" rows="3" 
+                class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white 
+                       focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"></textarea>
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-gray-300 mb-2">Technologies (comma separated)</label>
+              <input type="text" id="website-technologies" name="technologies" placeholder="React, Node.js, MongoDB" 
+                class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white 
+                       focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent">
+            </div>
+            <div class="md:col-span-2">
+              <Button type="submit" class="bg-cyan-500 hover:bg-cyan-600 text-white">
+                Add Website
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+
+      <!-- Websites List -->
+      <Card class="bg-slate-800/80 backdrop-blur-sm border-slate-700">
+        <CardHeader>
+          <CardTitle class="text-white">Your Websites</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div id="websites-list" class="space-y-4">
+            <!-- Websites will be loaded here -->
+          </div>
+          <div id="no-websites" class="text-center py-8 text-gray-400 hidden">
+            <p>No websites added yet. Add your first website above!</p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+
+    <!-- Modal for testimonial link -->
+    <div id="testimonial-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+      <div class="bg-slate-800 rounded-lg p-6 max-w-md w-full mx-4">
+        <h3 class="text-xl font-bold text-white mb-4">Testimonial Link Generated</h3>
+        <p class="text-gray-300 mb-4">Share this one-time link with your client:</p>
+        <div class="bg-slate-700 p-3 rounded border">
+          <input type="text" id="testimonial-link" readonly 
+            class="w-full bg-transparent text-cyan-400 outline-none">
+        </div>
+        <div class="flex gap-2 mt-4">
+          <button id="copy-link" class="bg-cyan-500 hover:bg-cyan-600 text-white px-4 py-2 rounded">
+            Copy Link
+          </button>
+          <button id="close-modal" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // DOM elements
+  const addWebsiteForm = document.getElementById('add-website-form');
+  const websitesList = document.getElementById('websites-list');
+  const noWebsites = document.getElementById('no-websites');
+  const testimonialModal = document.getElementById('testimonial-modal');
+  const testimonialLink = document.getElementById('testimonial-link');
+  const copyLinkBtn = document.getElementById('copy-link');
+  const closeModalBtn = document.getElementById('close-modal');
+
+  // Load websites on page load
+  document.addEventListener('DOMContentLoaded', loadWebsites);
+
+  // Add website form submission
+  addWebsiteForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    formData.append('action', 'create');
+    
+    // Validate that either file or URL is provided
+    const thumbnailFile = formData.get('thumbnailFile');
+    const thumbnailUrl = formData.get('thumbnailUrl');
+    
+    if ((!thumbnailFile || thumbnailFile.size === 0) && !thumbnailUrl) {
+      alert('Please upload an image file or provide an image URL.');
+      return;
+    }
+    
+    // Show loading state
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = thumbnailFile && thumbnailFile.size > 0 ? 'Uploading...' : 'Adding...';
+    submitBtn.disabled = true;
+
+    try {
+      const response = await fetch('/api/qeefoat/websites', {
+        method: 'POST',
+        body: formData
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        alert('Website added successfully!');
+        addWebsiteForm.reset();
+        loadWebsites();
+      } else {
+        alert('Error: ' + result.error);
+      }
+    } catch (error) {
+      alert('Error adding website: ' + error.message);
+    } finally {
+      // Restore button state
+      submitBtn.textContent = originalText;
+      submitBtn.disabled = false;
+    }
+  });
+
+  // Load websites function
+  async function loadWebsites() {
+    try {
+      const response = await fetch('/api/qeefoat/websites');
+      const result = await response.json();
+      
+      if (result.success) {
+        displayWebsites(result.websites);
+      } else {
+        console.error('Error loading websites:', result.error);
+      }
+    } catch (error) {
+      console.error('Error loading websites:', error);
+    }
+  }
+
+  // Display websites function
+  function displayWebsites(websites) {
+    if (websites.length === 0) {
+      websitesList.innerHTML = '';
+      noWebsites.classList.remove('hidden');
+      return;
+    }
+
+    noWebsites.classList.add('hidden');
+    websitesList.innerHTML = websites.map(website => createWebsiteCard(website)).join('');
+    
+    // Add event listeners for buttons
+    websites.forEach(website => {
+      const generateBtn = document.getElementById(`generate-${website.id}`);
+      const deleteBtn = document.getElementById(`delete-${website.id}`);
+      
+      generateBtn.addEventListener('click', () => generateTestimonialLink(website.id));
+      deleteBtn.addEventListener('click', () => deleteWebsite(website.id));
+    });
+  }
+
+  // Create website card HTML
+  function createWebsiteCard(website) {
+    const technologies = website.technologies && website.technologies.length > 0 
+      ? website.technologies.map(tech => `<span class="bg-cyan-400/20 text-cyan-400 text-xs px-2 py-1 rounded">${tech}</span>`).join('')
+      : '';
+
+    return `
+      <div class="bg-slate-700/50 rounded-lg p-4 border border-slate-600">
+        <div class="flex items-start gap-4">
+          ${website.thumbnail ? `<img src="${website.thumbnail}" alt="${website.name}" class="w-16 h-16 rounded object-cover">` : 
+            `<div class="w-16 h-16 bg-slate-600 rounded flex items-center justify-center">
+              <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"></path>
+              </svg>
+            </div>`}
+          
+          <div class="flex-1">
+            <h3 class="text-lg font-semibold text-white">${website.name}</h3>
+            <p class="text-cyan-400 text-sm mb-1">
+              <a href="${website.url}" target="_blank" class="hover:underline">${website.url}</a>
+            </p>
+            <p class="text-gray-300 text-sm mb-2">Client: ${website.client}</p>
+            ${website.description ? `<p class="text-gray-400 text-sm mb-2">${website.description}</p>` : ''}
+            ${technologies ? `<div class="flex flex-wrap gap-1 mb-3">${technologies}</div>` : ''}
+            
+            <div class="flex gap-2">
+              <button id="generate-${website.id}" 
+                class="bg-green-600 hover:bg-green-700 text-white text-sm px-3 py-1 rounded">
+                Generate Testimonial Link
+              </button>
+              <button id="delete-${website.id}" 
+                class="bg-red-600 hover:bg-red-700 text-white text-sm px-3 py-1 rounded">
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // Generate testimonial link
+  async function generateTestimonialLink(websiteId) {
+    try {
+      const response = await fetch('/api/qeefoat/websites', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          action: 'generateTestimonialLink',
+          websiteId: websiteId
+        })
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        testimonialLink.value = result.fullUrl;
+        testimonialModal.classList.remove('hidden');
+        testimonialModal.classList.add('flex');
+      } else {
+        alert('Error: ' + result.error);
+      }
+    } catch (error) {
+      alert('Error generating link: ' + error.message);
+    }
+  }
+
+  // Delete website
+  async function deleteWebsite(websiteId) {
+    if (!confirm('Are you sure you want to delete this website? This will also remove all associated testimonials.')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/qeefoat/websites?id=${websiteId}`, {
+        method: 'DELETE'
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        alert('Website deleted successfully!');
+        loadWebsites();
+      } else {
+        alert('Error: ' + result.error);
+      }
+    } catch (error) {
+      alert('Error deleting website: ' + error.message);
+    }
+  }
+
+  // Copy link to clipboard
+  copyLinkBtn.addEventListener('click', async () => {
+    try {
+      // Try modern clipboard API first
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(testimonialLink.value);
+        copyLinkBtn.textContent = 'Copied!';
+        setTimeout(() => {
+          copyLinkBtn.textContent = 'Copy Link';
+        }, 2000);
+      } else {
+        // Fallback for older browsers or non-secure contexts
+        testimonialLink.select();
+        testimonialLink.setSelectionRange(0, 99999); // For mobile devices
+        document.execCommand('copy');
+        copyLinkBtn.textContent = 'Copied!';
+        setTimeout(() => {
+          copyLinkBtn.textContent = 'Copy Link';
+        }, 2000);
+      }
+    } catch (error) {
+      // Ultimate fallback - just select the text so user can copy manually
+      try {
+        testimonialLink.select();
+        testimonialLink.setSelectionRange(0, 99999);
+        alert('Link selected! Press Ctrl+C (or Cmd+C on Mac) to copy.');
+      } catch (fallbackError) {
+        alert('Please manually copy the link from the text field.');
+      }
+    }
+  });
+
+  // Close modal
+  closeModalBtn.addEventListener('click', () => {
+    testimonialModal.classList.add('hidden');
+    testimonialModal.classList.remove('flex');
+  });
+
+  // Close modal on backdrop click
+  testimonialModal.addEventListener('click', (e) => {
+    if (e.target === testimonialModal) {
+      testimonialModal.classList.add('hidden');
+      testimonialModal.classList.remove('flex');
+    }
+  });
+</script>
+</Layout>

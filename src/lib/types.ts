@@ -41,10 +41,41 @@ export interface About {
   lastUpdated: string;
 }
 
+// New interfaces for website and testimonial management
+export interface Website {
+  id: string;
+  name: string;
+  url: string;
+  client: string;
+  thumbnail: string;
+  imageHistory?: string[]; // Previous thumbnail images
+  description?: string;
+  technologies?: string[];
+  createdAt: string;
+  testimonialLink?: string;
+  testimonialToken?: string;
+}
+
+export interface Testimonial {
+  id: string;
+  websiteId: string;
+  clientName: string;
+  clientEmail: string;
+  clientAvatar?: string;
+  rating: number;
+  experience: string;
+  feedback: string;
+  isPublished: boolean;
+  createdAt: string;
+  submittedAt: string;
+}
+
 export interface PortfolioData {
   works: Work[];
   blogPosts: BlogPost[];
   about?: About;
+  websites?: Website[]; // New field for website management
+  testimonials?: Testimonial[]; // New field for testimonials
 }
 
 export type Env = {
