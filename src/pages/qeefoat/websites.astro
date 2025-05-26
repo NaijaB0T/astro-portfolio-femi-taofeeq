@@ -201,9 +201,17 @@ import '../../styles/globals.css';
     // Add event listeners for buttons
     websites.forEach(website => {
       const generateBtn = document.getElementById(`generate-${website.id}`);
+      const viewBtn = document.getElementById(`view-${website.id}`);
       const deleteBtn = document.getElementById(`delete-${website.id}`);
       
-      generateBtn.addEventListener('click', () => generateTestimonialLink(website.id));
+      if (generateBtn) {
+        generateBtn.addEventListener('click', () => generateTestimonialLink(website.id));
+      }
+      
+      if (viewBtn) {
+        viewBtn.addEventListener('click', () => viewTestimonialLink(website));
+      }
+      
       deleteBtn.addEventListener('click', () => deleteWebsite(website.id));
     });
   }
@@ -234,10 +242,16 @@ import '../../styles/globals.css';
             ${technologies ? `<div class="flex flex-wrap gap-1 mb-3">${technologies}</div>` : ''}
             
             <div class="flex gap-2">
-              <button id="generate-${website.id}" 
-                class="bg-green-600 hover:bg-green-700 text-white text-sm px-3 py-1 rounded">
-                Generate Testimonial Link
-              </button>
+              ${website.testimonialLink ? 
+                `<button id="view-${website.id}" 
+                  class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-1 rounded">
+                  View Testimonial Link
+                </button>` :
+                `<button id="generate-${website.id}" 
+                  class="bg-green-600 hover:bg-green-700 text-white text-sm px-3 py-1 rounded">
+                  Generate Testimonial Link
+                </button>`
+              }
               <button id="delete-${website.id}" 
                 class="bg-red-600 hover:bg-red-700 text-white text-sm px-3 py-1 rounded">
                 Delete
@@ -269,11 +283,23 @@ import '../../styles/globals.css';
         testimonialLink.value = result.fullUrl;
         testimonialModal.classList.remove('hidden');
         testimonialModal.classList.add('flex');
+        // Reload websites list to update button state
+        loadWebsites();
       } else {
         alert('Error: ' + result.error);
       }
     } catch (error) {
       alert('Error generating link: ' + error.message);
+    }
+  }
+
+  // View existing testimonial link
+  function viewTestimonialLink(website) {
+    if (website.testimonialLink) {
+      const fullUrl = `${window.location.origin}${website.testimonialLink}`;
+      testimonialLink.value = fullUrl;
+      testimonialModal.classList.remove('hidden');
+      testimonialModal.classList.add('flex');
     }
   }
 

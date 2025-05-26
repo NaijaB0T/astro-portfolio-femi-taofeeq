@@ -47,4 +47,4 @@ npm run deploy
 
 ## License
 
-© 2024 FemiTaofeeq. All rights reserved.
+© 2025 FemiTaofeeq. All rights reserved.

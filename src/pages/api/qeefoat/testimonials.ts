@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getPortfolioData, savePortfolioData, generateId } from '../../../lib/data';
+import { uploadImageToR2, validateImageFile } from '../../../lib/upload';
 import type { Testimonial } from '../../../lib/types';
 
 export const GET: APIRoute = async ({ request, locals }) => {
@@ -32,6 +33,9 @@ export const GET: APIRoute = async ({ request, locals }) => {
         });
       }
 
+      // Check if testimonial already exists for this website
+      const existingTestimonial = portfolioData.testimonials?.find(t => t.websiteId === website.id);
+
       return new Response(JSON.stringify({
         success: true,
         website: {
@@ -41,7 +45,8 @@ export const GET: APIRoute = async ({ request, locals }) => {
           client: website.client,
           thumbnail: website.thumbnail,
           description: website.description
-        }
+        },
+        existingTestimonial: existingTestimonial || null
       }), {
         status: 200,
         headers: { 'Content-Type': 'application/json' }
@@ -69,20 +74,57 @@ export const GET: APIRoute = async ({ request, locals }) => {
 
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
-    const body = await request.json();
-    const { token, clientName, clientEmail, clientAvatar, rating, experience, feedback } = body;
+    const contentType = request.headers.get('content-type') || '';
+    const portfolioData = await getPortfolioData(locals.runtime.env);
+    
+    let token, clientName, clientEmail, clientAvatar, rating, experience, feedback;
+
+    // Handle FormData requests (for file upload)
+    if (contentType.includes('multipart/form-data')) {
+      const formData = await request.formData();
+      
+      token = formData.get('token') as string;
+      clientName = formData.get('clientName') as string;
+      clientEmail = formData.get('clientEmail') as string;
+      rating = formData.get('rating') as string;
+      experience = formData.get('experience') as string;
+      feedback = formData.get('feedback') as string;
+      
+      const clientAvatarFile = formData.get('clientAvatarFile') as File;
+      clientAvatar = '';
+      
+      // Handle file upload if provided
+      if (clientAvatarFile && clientAvatarFile.size > 0) {
+        const validation = validateImageFile(clientAvatarFile);
+        if (!validation.valid) {
+          return new Response(JSON.stringify({ 
+            success: false, 
+            error: validation.error 
+          }), {
+            status: 400,
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }
+        
+        const uploadResult = await uploadImageToR2(locals.runtime.env, clientAvatarFile, 'works');
+        clientAvatar = uploadResult.url;
+      }
+    } else {
+      // Handle JSON requests (for URL or no avatar)
+      const body = await request.json();
+      ({ token, clientName, clientEmail, clientAvatar, rating, experience, feedback } = body);
+    }
 
     if (!token || !clientName || !clientEmail || !rating || !experience || !feedback) {
       return new Response(JSON.stringify({
         success: false,
-        error: 'All fields are required'
+        error: 'All required fields must be filled'
       }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    const portfolioData = await getPortfolioData(locals.runtime.env);
     const website = portfolioData.websites?.find(w => w.testimonialToken === token);
     
     if (!website) {
@@ -91,6 +133,19 @@ export const POST: APIRoute = async ({ request, locals }) => {
         error: 'Invalid or expired testimonial link'
       }), {
         status: 404,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Check if testimonial already exists for this website
+    const existingTestimonial = portfolioData.testimonials?.find(t => t.websiteId === website.id);
+    
+    if (existingTestimonial) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Testimonial already submitted for this website'
+      }), {
+        status: 400,
         headers: { 'Content-Type': 'application/json' }
       });
     }
@@ -112,10 +167,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     if (!portfolioData.testimonials) portfolioData.testimonials = [];
     portfolioData.testimonials.push(testimonial);
 
-    // Invalidate the token after use (one-time use)
-    website.testimonialToken = undefined;
-    website.testimonialLink = undefined;
-    
+    // Keep the token active - don't invalidate it
     await savePortfolioData(locals.runtime.env, portfolioData);
 
     return new Response(JSON.stringify({
