@@ -23,7 +23,9 @@
     "astro": "^5.8.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "express": "^4.18.0",
     "lucide-astro": "^0.468.0",
+    "node-fetch": "^2.7.0",
     "tailwind-merge": "^2.5.4",
     "tailwindcss": "^3.4.17",
     "typescript": "5.8.3"
@@ -38,7 +40,21 @@
     "check": "astro build && tsc && wrangler deploy --dry-run",
     "deploy": "astro build && wrangler deploy",
     "dev": "astro dev",
-    "preview": "astro build && wrangler dev"
+    "preview": "astro build && wrangler dev",
+    "blog:publish": "node scripts/blog-manager.js publish --production",
+    "blog:publish-local": "node scripts/blog-manager.js publish",
+    "blog:publish-legacy": "node publish-blog.js",
+    "blog:generate": "node scripts/blog-generator.js generate",
+    "blog:batch": "node scripts/blog-manager.js batch --production",
+    "blog:batch-local": "node scripts/blog-manager.js batch",
+    "blog:monitor": "node scripts/blog-manager.js monitor",
+    "blog:health": "node scripts/blog-manager.js health --production",
+    "blog:health-local": "node scripts/blog-manager.js health",
+    "blog:templates": "node scripts/blog-manager.js templates",
+    "blog:help": "node scripts/blog-help.js",
+    "blog:webhook": "node scripts/webhook-handler.js",
+    "blog:schedule": "node scripts/blog-scheduler.js start",
+    "blog:test": "node scripts/blog-tester.js"
   },
   "type": "module"
 }

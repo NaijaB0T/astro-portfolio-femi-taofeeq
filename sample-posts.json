@@ -1,0 +1,49 @@
+[
+  {
+    "title": "Mastering Low-Light Cinematography: Techniques for Independent Filmmakers",
+    "slug": "mastering-low-light-cinematography-indie-filmmakers",
+    "excerpt": "Learn professional techniques for capturing stunning visuals in challenging low-light conditions without breaking your indie film budget.",
+    "author": "Femi Taofeeq",
+    "date": "2025-05-27",
+    "imageUrl": "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=800&h=400&fit=crop",
+    "sections": [
+      {
+        "subtitle": "Understanding Low-Light Challenges",
+        "content": "Low-light cinematography presents unique challenges that can make or break your film's visual impact. The key is understanding how light behaves and how different camera settings affect your final image quality.",
+        "order": 0
+      },
+      {
+        "subtitle": "Essential Equipment on a Budget",
+        "content": "You don't need expensive equipment to achieve professional results. Fast lenses, proper use of ISO, and strategic lighting placement can transform your low-light scenes dramatically.",
+        "imageUrl": "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=600&h=300&fit=crop",
+        "order": 1
+      },
+      {
+        "subtitle": "Advanced Techniques",
+        "content": "Master advanced techniques like exposure stacking, practical light integration, and color temperature mixing to create cinematic low-light scenes that rival big-budget productions.",
+        "order": 2
+      }
+    ]
+  },
+  {
+    "title": "The Art of Visual Storytelling: How Cinematography Shapes Narrative",
+    "slug": "art-visual-storytelling-cinematography-shapes-narrative",
+    "excerpt": "Explore how cinematographic choices influence audience emotion and understanding, transforming simple scenes into powerful narrative moments.",
+    "author": "Femi Taofeeq",
+    "date": "2025-05-28",
+    "imageUrl": "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=800&h=400&fit=crop",
+    "sections": [
+      {
+        "subtitle": "Camera Movement as Language",
+        "content": "Every camera movement tells a story. Understand how dolly shots, handheld work, and static compositions communicate different emotional states to your audience.",
+        "order": 0
+      },
+      {
+        "subtitle": "Color Psychology in Cinema",
+        "content": "Colors evoke powerful emotional responses. Learn how to use color grading and practical lighting to enhance your story's emotional arc and guide audience feelings.",
+        "imageUrl": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=300&fit=crop",
+        "order": 1
+      }
+    ]
+  }
+]

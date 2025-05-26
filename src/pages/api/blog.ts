@@ -3,21 +3,27 @@ import { getPortfolioData, savePortfolioData } from '../../lib/data';
 import { uploadImageToR2, validateImageFile } from '../../lib/upload';
 import type { BlogPost, BlogPostSection } from '../../lib/types';
 
-export const GET: APIRoute = async ({ locals }) => {
+export const GET: APIRoute = async ({ locals, url }) => {
   try {
     const data = await getPortfolioData(locals.runtime.env);
-    // Filter out archived blog posts for public API
-    const activePosts = data.blogPosts.filter(post => !post.archived);
-    // Sort blog posts by date in descending order (latest first)
-    activePosts.sort((a, b) => b.date.localeCompare(a.date));
+    const includeArchived = url.searchParams.get('includeArchived') === 'true';
     
-    return new Response(JSON.stringify(activePosts), {
+    // Filter based on archived status
+    const posts = includeArchived 
+      ? data.blogPosts 
+      : data.blogPosts.filter(post => !post.archived);
+    
+    // Sort blog posts by date in descending order (latest first)
+    posts.sort((a, b) => b.date.localeCompare(a.date));
+    
+    return new Response(JSON.stringify(posts), {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
       },
     });
   } catch (error) {
+    console.error('Blog GET error:', error);
     return new Response(JSON.stringify({ error: 'Failed to fetch blog posts' }), {
       status: 500,
       headers: {
@@ -29,121 +35,161 @@ export const GET: APIRoute = async ({ locals }) => {
 
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
-    const formData = await request.formData();
+    console.log('Blog POST: Starting request processing...');
+    const contentType = request.headers.get('content-type') || '';
+    console.log('Content-Type:', contentType);
+    
     const data = await getPortfolioData(locals.runtime.env);
+    console.log('Portfolio data loaded successfully');
     
-    // Extract form fields
-    const title = formData.get('title') as string;
-    const slug = formData.get('slug') as string;
-    const excerpt = formData.get('excerpt') as string;
-    const content = formData.get('content') as string;
-    const author = formData.get('author') as string;
-    const date = formData.get('date') as string;
-    const imageFile = formData.get('imageFile') as File;
-    const imageUrl = formData.get('imageUrl') as string;
-    const sectionsJson = formData.get('sections') as string;
+    let blogData: any = {};
+    let imageFiles: { [key: string]: File } = {};
+
+    // Handle both FormData and JSON (simplified logic)
+    if (contentType.includes('multipart/form-data')) {
+      console.log('Processing FormData...');
+      const formData = await request.formData();
+      
+      // Extract basic fields
+      blogData = {
+        title: formData.get('title') as string,
+        slug: formData.get('slug') as string,
+        excerpt: formData.get('excerpt') as string,
+        content: formData.get('content') as string || '',
+        author: formData.get('author') as string,
+        date: formData.get('date') as string,
+        imageUrl: formData.get('imageUrl') as string || '',
+        sections: []
+      };
+      
+      // Try to parse sections if provided
+      const sectionsData = formData.get('sections') as string;
+      if (sectionsData) {
+        try {
+          blogData.sections = JSON.parse(sectionsData);
+        } catch (e) {
+          console.log('Invalid sections JSON, using empty array');
+          blogData.sections = [];
+        }
+      }
+      
+      // Handle image file upload
+      const imageFile = formData.get('imageFile') as File;
+      if (imageFile && imageFile.size > 0) {
+        imageFiles['featured'] = imageFile;
+      }
+      
+    } else {
+      console.log('Processing JSON...');
+      blogData = await request.json();
+      
+      // Ensure sections is an array
+      if (!blogData.sections) {
+        blogData.sections = [];
+      }
+    }
+
+    console.log('Validating required fields...');
+    // Basic validation (simplified like works API)
+    if (!blogData.title || !blogData.slug || !blogData.excerpt || !blogData.author || !blogData.date) {
+      console.log('Missing required fields');
+      return new Response(JSON.stringify({ 
+        error: 'Required fields: title, slug, excerpt, author, date' 
+      }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Check for duplicate slug
+    const existingPost = data.blogPosts.find(post => post.slug === blogData.slug);
+    if (existingPost) {
+      console.log('Duplicate slug found');
+      return new Response(JSON.stringify({ 
+        error: 'A blog post with this slug already exists' 
+      }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    let finalImageUrl = blogData.imageUrl || '';
     
-    let finalImageUrl = imageUrl;
-    
-    // Handle image upload if file is provided
-    if (imageFile && imageFile.size > 0) {
-      const validation = validateImageFile(imageFile);
+    // Handle image upload if provided
+    if (imageFiles['featured']) {
+      console.log('Uploading featured image...');
+      const validation = validateImageFile(imageFiles['featured']);
       if (!validation.valid) {
-        return new Response(JSON.stringify({ error: validation.error }), {
+        return new Response(JSON.stringify({ 
+          error: `Featured image: ${validation.error}` 
+        }), {
           status: 400,
           headers: { 'Content-Type': 'application/json' },
         });
       }
       
-      console.log('Uploading blog image file:', imageFile.name, imageFile.size);
-      const uploadResult = await uploadImageToR2(locals.runtime.env, imageFile, 'blog');
+      const uploadResult = await uploadImageToR2(locals.runtime.env, imageFiles['featured'], 'blog');
       finalImageUrl = uploadResult.url;
-      console.log('Upload successful, URL:', finalImageUrl);
-    } else if (!imageUrl) {
-      return new Response(JSON.stringify({ error: 'Either upload a file or provide an image URL' }), {
+      console.log('Image uploaded successfully:', finalImageUrl);
+    }
+
+    // Require image (either file or URL)
+    if (!finalImageUrl) {
+      return new Response(JSON.stringify({ 
+        error: 'Featured image is required (file upload or URL)' 
+      }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
     }
     
-    // Validate required fields
-    if (!title || !slug || !excerpt || !author || !date) {
-      return new Response(JSON.stringify({ error: 'Title, slug, excerpt, author, and date are required' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-    
-    // Process sections if provided
+    // Process sections (simplified)
     let processedSections: BlogPostSection[] = [];
-    if (sectionsJson) {
-      try {
-        const sections = JSON.parse(sectionsJson);
-        
-        for (let i = 0; i < sections.length; i++) {
-          const section = sections[i];
-          let sectionImageUrl = section.imageUrl;
-          
-          // Check for section image file
-          const sectionImageFile = formData.get(`section-image-${i}`) as File;
-          if (sectionImageFile && sectionImageFile.size > 0) {
-            const validation = validateImageFile(sectionImageFile);
-            if (!validation.valid) {
-              return new Response(JSON.stringify({ error: `Section ${i + 1} image: ${validation.error}` }), {
-                status: 400,
-                headers: { 'Content-Type': 'application/json' },
-              });
-            }
-            
-            console.log('Uploading section image:', sectionImageFile.name);
-            const uploadResult = await uploadImageToR2(locals.runtime.env, sectionImageFile, 'blog-sections');
-            sectionImageUrl = uploadResult.url;
-          }
-          
-          if (section.subtitle || section.content) {
-            processedSections.push({
-              id: String(Date.now()) + '-' + i,
-              subtitle: section.subtitle || '',
-              content: section.content || '',
-              imageUrl: sectionImageUrl,
-              order: section.order || i,
-            });
-          }
-        }
-        
-        // Sort sections by order
-        processedSections.sort((a, b) => a.order - b.order);
-      } catch (error) {
-        console.error('Error processing sections:', error);
-        return new Response(JSON.stringify({ error: 'Invalid sections data' }), {
-          status: 400,
-          headers: { 'Content-Type': 'application/json' },
-        });
-      }
+    if (Array.isArray(blogData.sections)) {
+      processedSections = blogData.sections.map((section: any, index: number) => ({
+        id: String(Date.now()) + '-' + index,
+        subtitle: section.subtitle || '',
+        content: section.content || '',
+        imageUrl: section.imageUrl || '',
+        order: section.order !== undefined ? section.order : index,
+      }));
+      
+      // Sort sections by order
+      processedSections.sort((a, b) => a.order - b.order);
     }
-    
+
+    console.log('Creating new blog post...');
     const newPost: BlogPost = {
       id: String(Date.now()),
-      title,
-      slug,
-      excerpt,
-      content: content || '', // Keep for backward compatibility
+      title: blogData.title,
+      slug: blogData.slug,
+      excerpt: blogData.excerpt,
+      content: blogData.content || '',
       sections: processedSections.length > 0 ? processedSections : undefined,
-      author,
-      date,
+      author: blogData.author,
+      date: blogData.date,
       imageUrl: finalImageUrl,
+      archived: false
     };
     
     data.blogPosts.push(newPost);
     await savePortfolioData(locals.runtime.env, data);
     
+    console.log('Blog post created successfully:', newPost.title);
+    
+    // Return simplified response like works API
     return new Response(JSON.stringify(newPost), {
       status: 201,
       headers: { 'Content-Type': 'application/json' },
     });
+    
   } catch (error) {
-    console.error('Error creating blog post:', error);
-    return new Response(JSON.stringify({ error: 'Failed to create blog post' }), {
+    console.error('Blog POST error:', error);
+    
+    // Simplified error response like works API
+    return new Response(JSON.stringify({ 
+      error: 'Failed to create blog post'
+    }), {
       status: 500,
       headers: {
         'Content-Type': 'application/json',

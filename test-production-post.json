@@ -1,0 +1,15 @@
+{
+  "title": "Production Publishing Test - Unique Post",
+  "slug": "production-publishing-test-unique-post-2025",
+  "excerpt": "Testing production publishing functionality with enhanced blog system.",
+  "author": "Femi Taofeeq",
+  "date": "2025-05-26",
+  "imageUrl": "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800&h=400&fit=crop",
+  "sections": [
+    {
+      "subtitle": "Production Test",
+      "content": "This is a test post to verify that production publishing is working correctly with the enhanced blog system.",
+      "order": 0
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "blog": {
+    "publisher": {
+      "localUrl": "http://localhost:4321",
+      "productionUrl": "https://femitaofeeq.com",
+      "maxRetries": 3,
+      "retryDelay": 2000,
+      "verificationAttempts": 5,
+      "verificationDelay": 1000,
+      "requestTimeout": 30000,
+      "healthCheckTimeout": 10000
+    },
+    "monitoring": {
+      "checkInterval": 30000,
+      "logLevel": "info",
+      "logFile": "blog-publish-logs.json",
+      "maxLogEntries": 1000
+    },
+    "batch": {
+      "defaultDelay": 5000,
+      "maxConcurrent": 1,
+      "enableProgressReporting": true
+    },
+    "defaults": {
+      "author": "Femi Taofeeq",
+      "imageUrl": "https://images.unsplash.com/photo-1489599577332-58f6fd0bb8e8?w=800&h=400&fit=crop&crop=center",
+      "templateType": "cinematography"
+    }
+  },
+  "features": {
+    "enableAnalytics": true,
+    "enableSeoCheck": true,
+    "enableImageOptimization": true,
+    "enableAutoScheduling": false,
+    "enableNotifications": false
+  }
+}
