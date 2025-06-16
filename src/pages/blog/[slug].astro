@@ -45,6 +45,9 @@ function formatDate(dateString: string): string {
             <span>By {post.author}</span>
             <span>•</span>
             <span>{formatDate(post.date)}</span>
+            <span class="text-sm text-muted-foreground flex items-center">
+              <span class="mr-1">👁️</span> {post.viewCount || 0}
+            </span>
           </div>
           <img 
             src={post.imageUrl}
