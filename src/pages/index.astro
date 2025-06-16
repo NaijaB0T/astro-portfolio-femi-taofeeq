@@ -9,6 +9,8 @@ import CardDescription from '../components/ui/CardDescription.astro';
 import CardContent from '../components/ui/CardContent.astro';
 import { getPortfolioData } from '../lib/data';
 import '../styles/globals.css';
+import type { BlogPost, Website } from '../lib/types'; // Import Website type
+import { GET as getBlogPostsApi } from './api/blog'; // Import the GET handler from blog API
 
 let portfolioData;
 try {
@@ -19,11 +21,43 @@ try {
 }
 
 // Filter out archived works for public display and sort by year (latest first)
-const { works } = {
+const { works, websites } = { // Destructure websites from portfolioData
   works: portfolioData.works
     .filter(work => !work.archived)
-    .sort((a, b) => parseInt(b.id) - parseInt(a.id))
+    .sort((a, b) => parseInt(b.id) - parseInt(a.id)),
+  websites: portfolioData.websites || [] // Ensure websites is an array
 };
+
+// Fetch blog posts and find the most viewed one
+let mostViewedPost: BlogPost | undefined;
+try {
+  const allPostsResponse = await getBlogPostsApi({ 
+    locals: Astro.locals, 
+    url: new URL(`${Astro.url.origin}/api/blog?includeArchived=false`) 
+  } as any);
+
+  if (allPostsResponse.status === 200) {
+    const allPosts: BlogPost[] = await allPostsResponse.json();
+    // Sort by viewCount descending, then by date descending for tie-breaking
+    const sortedPosts = allPosts
+      .filter(post => !post.archived)
+      .sort((a, b) => (b.viewCount ?? 0) - (a.viewCount ?? 0) || b.date.localeCompare(a.date));
+    
+    mostViewedPost = sortedPosts[0];
+  } else {
+    console.error('Failed to fetch blog posts for most viewed section:', allPostsResponse.statusText);
+  }
+} catch (error) {
+  console.error('Error fetching blog posts for most viewed section:', error);
+}
+
+function formatDate(dateString: string): string {
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+}
 ---
 
 <Layout title="FemiTaofeeq - Cinematographer Portfolio">
@@ -35,7 +69,8 @@ const { works } = {
     </section>
 
     <!-- Works Grid -->
-    <section>
+    <section class="mb-16">
+      <h2 class="text-3xl font-bold text-center mb-8">My Works</h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {works.map((work) => (
           <div class="group cursor-pointer work-item" data-work-id={work.id}>
@@ -52,6 +87,79 @@ const { works } = {
       </div>
     </section>
     
+    <!-- Most Viewed Blog Post Section -->
+    {mostViewedPost && (
+      <section class="mb-16">
+        <h2 class="text-3xl font-bold text-center mb-8">Most Viewed Blog Post</h2>
+        <a href={`/blog/${mostViewedPost.slug}`} class="block max-w-3xl mx-auto group">
+          <Card class="overflow-hidden">
+            <div class="relative aspect-video">
+              <img 
+                src={mostViewedPost.imageUrl} 
+                alt={mostViewedPost.title}
+                class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+              <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 text-white">
+                <h3 class="text-2xl font-bold mb-1">{mostViewedPost.title}</h3>
+                <p class="text-sm text-gray-200 line-clamp-2">{mostViewedPost.excerpt}</p>
+                <div class="flex items-center space-x-4 text-xs text-gray-300 mt-2">
+                  <span>By {mostViewedPost.author}</span>
+                  <span>•</span>
+                  <span>{formatDate(mostViewedPost.date)}</span>
+                  <span class="flex items-center">
+                    <span class="mr-1">👁️</span> {mostViewedPost.viewCount || 0} views
+                  </span>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </a>
+      </section>
+    )}
+
+    <!-- Websites Section (Horizontal Scroll) -->
+    {websites && websites.length > 0 && (
+      <section class="mb-16">
+        <h2 class="text-3xl font-bold text-center mb-8">Websites I've Built</h2>
+        <div class="flex overflow-x-auto space-x-6 pb-4 scrollbar-hide">
+          {websites.map((website) => (
+            <a href={website.url} target="_blank" rel="noopener noreferrer" class="flex-none w-80 group">
+              <Card class="overflow-hidden h-full flex flex-col">
+                <div class="aspect-video overflow-hidden">
+                  <img 
+                    src={website.thumbnail} 
+                    alt={website.name}
+                    class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                </div>
+                <CardHeader>
+                  <CardTitle>{website.name}</CardTitle>
+                  <CardDescription>{website.client}</CardDescription>
+                </CardHeader>
+                {website.description && (
+                  <CardContent class="flex-grow">
+                    <p class="text-sm text-muted-foreground line-clamp-3">{website.description}</p>
+                  </CardContent>
+                )}
+                {website.technologies && website.technologies.length > 0 && (
+                  <CardContent class="pt-0">
+                    <div class="flex flex-wrap gap-2">
+                      {website.technologies.map(tech => (
+                        <span class="inline-flex items-center rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary ring-1 ring-inset ring-primary/20">
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  </CardContent>
+                )}
+              </Card>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
     <!-- Image Modal -->
     <div id="imageModal" class="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
       <div class="flex flex-col max-w-5xl max-h-full">
