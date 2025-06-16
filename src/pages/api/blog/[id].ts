@@ -14,14 +14,22 @@ export const GET: APIRoute = async ({ params, locals }) => {
     }
 
     const data = await getPortfolioData(locals.runtime.env);
-    const post = data.blogPosts.find(p => p.id === postId);
+    const postIndex = data.blogPosts.findIndex(p => p.id === postId);
     
-    if (!post) {
+    if (postIndex === -1) {
       return new Response(JSON.stringify({ error: 'Blog post not found' }), {
         status: 404,
         headers: { 'Content-Type': 'application/json' },
       });
     }
+
+    const post = data.blogPosts[postIndex];
+    
+    // Increment view count
+    post.viewCount = (post.viewCount || 0) + 1;
+    
+    // Save updated data
+    await savePortfolioData(locals.runtime.env, data);
 
     return new Response(JSON.stringify(post), {
       headers: { 'Content-Type': 'application/json' },

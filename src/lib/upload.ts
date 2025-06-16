@@ -3,7 +3,7 @@ import type { Env } from './types';
 export async function uploadImage(
   env: Env, 
   file: File, 
-  folder: 'works' | 'blog' | 'about'
+  folder: 'works' | 'blog' | 'about' | 'blog-sections'
 ): Promise<string> {
   try {
     console.log('Starting image upload:', { fileName: file.name, size: file.size, type: file.type });
@@ -57,7 +57,7 @@ export async function uploadImage(
 export async function uploadImageToR2(
   env: Env, 
   file: File, 
-  folder: 'works' | 'blog' | 'about'
+  folder: 'works' | 'blog' | 'about' | 'blog-sections'
 ): Promise<{ url: string; key: string }> {
   try {
     const timestamp = Date.now();

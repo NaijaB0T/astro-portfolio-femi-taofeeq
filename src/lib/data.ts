@@ -3,8 +3,14 @@ import type { PortfolioData, Work, BlogPost, About, Env } from './types';
 // Data storage using R2 bucket - consistent with your existing pattern
 const DATA_KEY = 'femi-portfolio-data/femi-tao-portfolio-db.json';
 
-export async function getPortfolioData(env: Env): Promise<PortfolioData> {
+interface GetPortfolioDataOptions {
+  cacheBuster?: number; // Optional parameter to help with caching in dev
+}
+
+export async function getPortfolioData(env: Env, options?: GetPortfolioDataOptions): Promise<PortfolioData> {
   try {
+    // The cacheBuster is not directly used for R2, but its presence in the signature
+    // allows Astro to treat the function call as unique, potentially bypassing dev server caching.
     const object = await env.BUCKET.get(DATA_KEY);
     if (!object) {
       // Return default data structure if file doesn't exist

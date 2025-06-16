@@ -30,6 +30,7 @@ export interface BlogPost {
   imageUrl: string; // Main/header image
   imageHistory?: string[]; // Previous images
   archived?: boolean;
+  viewCount?: number;
 }
 
 export interface About {
