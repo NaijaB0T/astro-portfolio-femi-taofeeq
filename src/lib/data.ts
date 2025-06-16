@@ -29,6 +29,12 @@ export async function getPortfolioData(env: Env, options?: GetPortfolioDataOptio
     // Ensure new fields exist for backward compatibility without overwriting existing data
     if (!parsed.websites) parsed.websites = [];
     if (!parsed.testimonials) parsed.testimonials = [];
+
+    // Ensure all blog posts have a viewCount, initialize to 0 if missing
+    parsed.blogPosts = parsed.blogPosts.map(post => ({
+      ...post,
+      viewCount: post.viewCount ?? 0 // Use nullish coalescing to set to 0 if undefined or null
+    }));
     
     return parsed;
   } catch (error) {

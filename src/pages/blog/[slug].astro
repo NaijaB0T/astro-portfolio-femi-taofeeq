@@ -2,21 +2,39 @@
 export const prerender = false;
 
 import Layout from '../../layouts/Layout.astro';
-import { getPortfolioData } from '../../lib/data';
 import { parseMarkdown } from '../../lib/markdown';
 import '../../styles/globals.css';
+import type { BlogPost } from '../../lib/types';
 
 const { slug } = Astro.params;
 
-let portfolioData;
-try {
-  portfolioData = await getPortfolioData(Astro.locals.runtime.env);
-} catch (error) {
-  console.error('Error loading data:', error);
-  throw error;
-}
+let post: BlogPost | undefined;
 
-const post = portfolioData.blogPosts.find(p => p.slug === slug && !p.archived);
+try {
+  // Fetch all blog posts to find the correct one by slug
+  const allPostsResponse = await fetch(`${Astro.url.origin}/api/blog`);
+  if (!allPostsResponse.ok) {
+    throw new Error(`Failed to fetch blog posts: ${allPostsResponse.statusText}`);
+  }
+  const allPosts: BlogPost[] = await allPostsResponse.json();
+  
+  const foundPost = allPosts.find(p => p.slug === slug && !p.archived);
+
+  if (!foundPost) {
+    return Astro.redirect('/blog');
+  }
+
+  // Now, make a specific request to the post's ID endpoint to increment view count
+  const postResponse = await fetch(`${Astro.url.origin}/api/blog/${foundPost.id}`);
+  if (!postResponse.ok) {
+    throw new Error(`Failed to fetch blog post by ID: ${postResponse.statusText}`);
+  }
+  post = await postResponse.json();
+
+} catch (error) {
+  console.error('Error fetching blog post:', error);
+  return Astro.redirect('/blog'); // Redirect to blog list on error
+}
 
 if (!post) {
   return Astro.redirect('/blog');
