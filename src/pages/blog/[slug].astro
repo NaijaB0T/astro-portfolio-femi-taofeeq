@@ -5,15 +5,21 @@ import Layout from '../../layouts/Layout.astro';
 import { parseMarkdown } from '../../lib/markdown';
 import '../../styles/globals.css';
 import type { BlogPost } from '../../lib/types';
+import { GET as getBlogPostsApi } from '../api/blog'; // Import the GET handler from blog API
+import { GET as getBlogPostByIdApi } from '../api/blog/[id]'; // Import the GET handler from blog/[id] API
 
 const { slug } = Astro.params;
 
 let post: BlogPost | undefined;
 
 try {
-  // Fetch all blog posts to find the correct one by slug
-  const allPostsResponse = await fetch(`${Astro.url.origin}/api/blog`);
-  if (!allPostsResponse.ok) {
+  // Directly call the GET handler for all blog posts
+  const allPostsResponse = await getBlogPostsApi({ 
+    locals: Astro.locals, 
+    url: new URL(`${Astro.url.origin}/api/blog`) // Pass a dummy URL for searchParams
+  } as any); // Cast to any to satisfy APIRoute type
+
+  if (allPostsResponse.status !== 200) {
     throw new Error(`Failed to fetch blog posts: ${allPostsResponse.statusText}`);
   }
   const allPosts: BlogPost[] = await allPostsResponse.json();
@@ -24,9 +30,13 @@ try {
     return Astro.redirect('/blog');
   }
 
-  // Now, make a specific request to the post's ID endpoint to increment view count
-  const postResponse = await fetch(`${Astro.url.origin}/api/blog/${foundPost.id}`);
-  if (!postResponse.ok) {
+  // Directly call the GET handler for the specific blog post to increment view count
+  const postResponse = await getBlogPostByIdApi({ 
+    params: { id: foundPost.id }, 
+    locals: Astro.locals 
+  } as any); // Cast to any to satisfy APIRoute type
+
+  if (postResponse.status !== 200) {
     throw new Error(`Failed to fetch blog post by ID: ${postResponse.statusText}`);
   }
   post = await postResponse.json();
